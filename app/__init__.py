@@ -1,5 +1,5 @@
-from flask import Flask, jsonify, request
-from app.models import db, Customer, ServiceTicket, Vehicle, Mechanic, Service
+from flask import Flask
+from app.models import db
 from app.extensions import ma
 from app.blueprints.customers import customers_bp
 from app.blueprints.service_tickets import service_tickets_bp
