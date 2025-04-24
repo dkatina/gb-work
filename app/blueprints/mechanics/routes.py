@@ -7,7 +7,7 @@ from marshmallow import ValidationError
 
 # Mechanics Endpoints
 # Endpoint to create a new mechanic with validation error handling
-@mechanics_bp.route('/mechanics', methods=['POST'])
+@mechanics_bp.route('/', methods=['POST'])
 def create_mechanic():
     try:
         data = request.get_json()
@@ -22,7 +22,7 @@ def create_mechanic():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to get all mechanics with validation error handling
-@mechanics_bp.route('/mechanics', methods=['GET'])
+@mechanics_bp.route('/', methods=['GET'])
 def get_mechanics():
     try:
         mechanics = Mechanic.query.all()
@@ -31,7 +31,7 @@ def get_mechanics():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to get a specific mechanic by ID with validation error handling
-@mechanics_bp.route('/mechanics/<int:id>', methods=['GET'])
+@mechanics_bp.route('/<int:id>', methods=['GET'])
 def get_mechanic(id):
     try:
         mechanic = Mechanic.query.get_or_404(id)
@@ -42,7 +42,7 @@ def get_mechanic(id):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to update an existing mechanic with validation error handling
-@mechanics_bp.route('/mechanics/<int:id>', methods=['PUT'])
+@mechanics_bp.route('/<int:id>', methods=['PUT'])
 def update_mechanic(id):
     try:
         mechanic = Mechanic.query.get_or_404(id)
@@ -57,7 +57,7 @@ def update_mechanic(id):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to delete a mechanic with validation error handling
-@mechanics_bp.route('/mechanics/<int:id>', methods=['DELETE'])
+@mechanics_bp.route('/<int:id>', methods=['DELETE'])
 def delete_mechanic(id):
     try:
         mechanic = Mechanic.query.get_or_404(id)
