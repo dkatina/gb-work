@@ -11,7 +11,7 @@ from marshmallow import ValidationError
 def create_service_ticket():
     try:
         data = request.get_json()
-        service_ticket = service_tickets_schema.load(data, session=db.session)
+        service_ticket = service_ticket_schema.load(data, session=db.session)
         db.session.add(service_ticket)
         db.session.commit()
         return service_ticket_schema.jsonify(service_ticket), 201
@@ -46,7 +46,7 @@ def update_service_ticket(id):
     try:
         service_ticket = ServiceTicket.query.get_or_404(id)
         data = request.get_json()
-        service_ticket = service_tickets_schema.load(data, instance=service_ticket, session=db.session)
+        service_ticket = service_ticket_schema.load(data, instance=service_ticket, session=db.session)
         db.session.commit()
         return service_ticket_schema.jsonify(service_ticket), 200
     except ValidationError as err:

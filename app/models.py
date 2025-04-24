@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, backref, DeclarativeBase
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 class Base(DeclarativeBase):
     pass
@@ -27,7 +28,7 @@ class ServiceTicket(db.Model):
     id = Column(Integer, primary_key=True)
     customer_id = Column(Integer, ForeignKey('customers.id'), nullable=False)
     vin = Column(String(17), nullable=False, unique=True)
-    service_date = Column(DateTime, nullable=False)
+    service_date = Column(DateTime, nullable=False, default=datetime.utcnow)
     service_desc = Column(String(200), nullable=False)
     
     # Relationship with the Customer class and Mechanic class

@@ -1,6 +1,6 @@
 from app.models import Mechanic, ServiceTicket
 from app.extensions import ma
-from marshmallow import ValidationError
+from marshmallow import ValidationError, post_load
 
 
 class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
@@ -15,12 +15,21 @@ class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
     def get_mechanic_ids(self, obj):
         return [mechanic.id for mechanic in obj.mechanics]
     
-    def load_mechanic_ids(self, value, obj, **kwargs):
+    def load_mechanic_ids(self, value):
         if isinstance(value, list):
-            obj.mechanics = [Mechanic.query.get(id) for id in value]
+            mechanics = [Mechanic.query.get(id) for id in value]
+            if None in mechanics:
+                raise ValidationError("One or more mechanic IDs are invalid.")
+            return mechanics
         else:
             raise ValidationError("Invalid mechanic IDs format. Expected a list of integers.")
 
+    @post_load
+    def assign_mechanics(self, data, **kwargs):
+        mechanics = data.pop('mechanic_ids', [])
+        data['mechanics'] = mechanics
+        return data
+    
 # Instances for serialization    
 service_ticket_schema = ServiceTicketSchema()
 service_tickets_schema = ServiceTicketSchema(many=True)
