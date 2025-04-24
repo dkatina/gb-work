@@ -1,5 +1,5 @@
 from app.blueprints.mechanics import mechanics_bp
-from app.blueprints.mechanics.mechanicsSchemas import MechanicSchema, mechanics_schema
+from app.blueprints.mechanics.mechanicsSchemas import MechanicSchema, mechanics_schema, mechanic_schema
 from app.models import db, Mechanic
 from flask import jsonify, request
 from marshmallow import ValidationError
@@ -35,7 +35,7 @@ def get_mechanics():
 def get_mechanic(id):
     try:
         mechanic = Mechanic.query.get_or_404(id)
-        return mechanics_schema.jsonify(mechanic), 200
+        return mechanic_schema.jsonify(mechanic), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
