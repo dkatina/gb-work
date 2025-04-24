@@ -10,7 +10,7 @@ db = SQLAlchemy(model_class=Base)
 # Creating the database tables
 # Customer class
 # This class represents the customers table in the database
-class Customer(Base):
+class Customer(db.Model):
     __tablename__ = 'customers'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
@@ -22,7 +22,7 @@ class Customer(Base):
     
 # Service_Tickets class
 # This class represents the service_tickets table in the database
-class ServiceTicket(Base):
+class ServiceTicket(db.Model):
     __tablename__ = 'service_tickets'
     id = Column(Integer, primary_key=True)
     customer_id = Column(Integer, ForeignKey('customers.id'), nullable=False)
@@ -32,10 +32,11 @@ class ServiceTicket(Base):
     
     # Relationship with the Customer class and Mechanic class
     customer = relationship('Customer', back_populates='service_tickets', lazy=True)
+    mechanics = relationship('Mechanic', secondary='service_mechanics', backref='service_tickets', lazy=True)
     
 # Mechanics class
 # This class represents the mechanics table in the database
-class Mechanic(Base):
+class Mechanic(db.Model):
     __tablename__ = 'mechanics'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
@@ -45,11 +46,7 @@ class Mechanic(Base):
     
 # Service_Mechanics class
 # This class represents the service_mechanics table in the database as a many-to-many relationship
-class ServiceMechanic(Base):
+class ServiceMechanic(db.Model):
     __tablename__ = 'service_mechanics'
     service_ticket_id = Column(Integer, ForeignKey('service_tickets.id'), primary_key=True)
     mechanic_id = Column(Integer, ForeignKey('mechanics.id'), primary_key=True)
-    
-    # Relationship with the ServiceTicket and Mechanic classes
-    service_ticket = relationship('ServiceTicket', backref=backref('service_mechanics', lazy='dynamic'))
-    mechanic = relationship('Mechanic', backref=backref('service_mechanics', lazy='dynamic'))
