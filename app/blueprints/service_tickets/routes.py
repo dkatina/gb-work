@@ -6,27 +6,7 @@ from marshmallow import ValidationError
 
 
 # Service Tickets Endpoints
-# Endpoint to get all service tickets with validation error handling
-@service_tickets_bp.route('/', methods=['GET'])
-def get_service_tickets():
-    try:
-        service_tickets = ServiceTicket.query.all()
-        return service_tickets_schema.jsonify(service_tickets), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Endpoint to get a specific service ticket by ID with validation error handling
-@service_tickets_bp.route('/<int:id>', methods=['GET'])
-def get_service_ticket(id):
-    try:
-        service_ticket = ServiceTicket.query.get_or_404(id)
-        return service_ticket_schema.jsonify(service_ticket), 200
-    except ValidationError as err:
-        return jsonify(err.messages), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Endpoint to create a new service ticket with validation error handling
+# Endpoint to CREATE a new service ticket with validation error handling
 @service_tickets_bp.route('/', methods=['POST'])
 def create_service_ticket():
     try:
@@ -40,7 +20,27 @@ def create_service_ticket():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to update an existing service ticket with validation error handling
+# Endpoint to GET ALL service tickets with validation error handling
+@service_tickets_bp.route('/', methods=['GET'])
+def get_service_tickets():
+    try:
+        service_tickets = ServiceTicket.query.all()
+        return service_tickets_schema.jsonify(service_tickets), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Endpoint to GET a SPECIFIC service ticket by ID with validation error handling
+@service_tickets_bp.route('/<int:id>', methods=['GET'])
+def get_service_ticket(id):
+    try:
+        service_ticket = ServiceTicket.query.get_or_404(id)
+        return service_ticket_schema.jsonify(service_ticket), 200
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+'''
+# Endpoint to UPDATE an existing service ticket with validation error handling
 @service_tickets_bp.route('/<int:id>', methods=['PUT'])
 def update_service_ticket(id):
     try:
@@ -54,7 +54,7 @@ def update_service_ticket(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to delete a service ticket with validation error handling
+# Endpoint to DELETE a service ticket with validation error handling
 @service_tickets_bp.route('/<int:id>', methods=['DELETE'])
 def delete_service_ticket(id):
     try:
@@ -66,3 +66,4 @@ def delete_service_ticket(id):
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+'''

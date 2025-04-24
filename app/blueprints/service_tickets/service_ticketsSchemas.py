@@ -1,11 +1,13 @@
 from app.models import ServiceTicket
 from app.extensions import ma
 
+
 class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ServiceTicket
         load_instance = True
         include_fk = True
+        fields = ('mechanic_ids', 'customer_id', 'vehicle_id', 'service_date', 'VIN', 'description')
 
 # Instances for serialization    
 service_ticket_schema = ServiceTicketSchema()
