@@ -3,11 +3,12 @@ from app.blueprints.mechanics.mechanicsSchemas import MechanicSchema, mechanics_
 from app.models import db, Mechanic
 from flask import jsonify, request
 from marshmallow import ValidationError
-
+from app.extensions import limiter
 
 # Mechanics Endpoints
 # Endpoint to create a new mechanic with validation error handling
 @mechanics_bp.route('/', methods=['POST'])
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def create_mechanic():
     try:
         data = request.get_json()
@@ -21,7 +22,7 @@ def create_mechanic():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to get all mechanics with validation error handling
+# Endpoint to GET ALL mechanics with validation error handling
 @mechanics_bp.route('/', methods=['GET'])
 def get_mechanics():
     try:
@@ -30,7 +31,7 @@ def get_mechanics():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to get a specific mechanic by ID with validation error handling
+# Endpoint to GET a SPECIFIC mechanic by ID with validation error handling
 @mechanics_bp.route('/<int:id>', methods=['GET'])
 def get_mechanic(id):
     try:
@@ -41,8 +42,9 @@ def get_mechanic(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to update an existing mechanic with validation error handling
+# Endpoint to UPDATE an existing mechanic with validation error handling
 @mechanics_bp.route('/<int:id>', methods=['PUT'])
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_mechanic(id):
     try:
         mechanic = Mechanic.query.get_or_404(id)
@@ -56,8 +58,9 @@ def update_mechanic(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to delete a mechanic with validation error handling
+# Endpoint to DELETE a mechanic by id with validation error handling
 @mechanics_bp.route('/<int:id>', methods=['DELETE'])
+@limiter.limit("2 per day")
 def delete_mechanic(id):
     try:
         mechanic = Mechanic.query.get_or_404(id)

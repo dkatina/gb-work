@@ -3,11 +3,13 @@ from app.blueprints.service_tickets.service_ticketsSchemas import service_ticket
 from app.models import db, ServiceTicket
 from flask import jsonify, request
 from marshmallow import ValidationError
+from app.extensions import limiter
 
 
 # Service Tickets Endpoints
 # Endpoint to CREATE a new service ticket with validation error handling
 @service_tickets_bp.route('/', methods=['POST'])
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def create_service_ticket():
     try:
         data = request.get_json()
@@ -39,9 +41,10 @@ def get_service_ticket(id):
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-'''
+
 # Endpoint to UPDATE an existing service ticket with validation error handling
 @service_tickets_bp.route('/<int:id>', methods=['PUT'])
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_service_ticket(id):
     try:
         service_ticket = ServiceTicket.query.get_or_404(id)
@@ -56,6 +59,7 @@ def update_service_ticket(id):
 
 # Endpoint to DELETE a service ticket with validation error handling
 @service_tickets_bp.route('/<int:id>', methods=['DELETE'])
+@limiter.limit("2 per day")
 def delete_service_ticket(id):
     try:
         service_ticket = ServiceTicket.query.get_or_404(id)
@@ -66,4 +70,3 @@ def delete_service_ticket(id):
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-'''

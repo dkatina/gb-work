@@ -3,10 +3,12 @@ from app.blueprints.customers.customersSchemas import CustomerSchema, customers_
 from app.models import db, Customer
 from flask import jsonify, request
 from marshmallow import ValidationError
+from app.extensions import limiter
 
 # Customers Endpoints
-# Endpoint to create a new customer with validation error handling
+# Endpoint to CREATE a new customer with validation error handling
 @customers_bp.route('/', methods=['POST'])
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def create_customer():
     try:
         data = request.get_json()
@@ -20,7 +22,7 @@ def create_customer():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to get all customers with validation error handling
+# Endpoint to GET ALL customers with validation error handling
 @customers_bp.route('/', methods=['GET'])
 def get_customers():
     try:
@@ -29,7 +31,7 @@ def get_customers():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to get a specific customer by ID with validation error handling
+# Endpoint to GET a SPECIFIC customer by ID with validation error handling
 @customers_bp.route('/<int:id>', methods=['GET'])
 def get_customer(id):
     try:
@@ -40,8 +42,9 @@ def get_customer(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to update an existing customer with validation error handling
+# Endpoint to UPDATE an existing customer with validation error handling
 @customers_bp.route('/<int:id>', methods=['PUT'])
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_customer(id):
     try:
         customer = Customer.query.get_or_404(id)
@@ -55,8 +58,9 @@ def update_customer(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to delete a customer with validation error handling
+# Endpoint to DELETE a customer with validation error handling
 @customers_bp.route('/<int:id>', methods=['DELETE'])
+@limiter.limit("2 per day")
 def delete_customer(id):
     try:
         customer = Customer.query.get_or_404(id)
