@@ -5,8 +5,9 @@ from app.models import db, Customer
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
-from app.utils.util import encode_token
+from app.utils.util import encode_token, token_required
 
+# Customers Endpoints
 # Customer Login
 @customers_bp.route('/login', methods=['POST'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
@@ -34,7 +35,6 @@ def login_customer():
         return jsonify({"error": "Invalid email or password credentials"}), 401
 
 
-# Customers Endpoints
 # Endpoint to CREATE a new customer with validation error handling
 @customers_bp.route('/', methods=['POST'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
@@ -89,16 +89,14 @@ def update_customer(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to DELETE a customer with validation error handling
+# Endpoint to DELETE a customer with validation error handling and requires token authentication
 @customers_bp.route('/<int:id>', methods=['DELETE'])
 @limiter.limit("2 per day")
-def delete_customer(id):
-    try:
-        customer = Customer.query.get_or_404(id)
-        db.session.delete(customer)
-        db.session.commit()
-        return jsonify({"message": "Customer deleted successfully"}), 204
-    except ValidationError as err:
-        return jsonify(err.messages), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@token_required
+def delete_customer(customer_id): # Receiving customer_id from the token
+    query = select(Customer).where(Customer.id == customer_id)
+    customer = db.session.execute(query).scalars().first()
+    
+    db.session.delete(customer)
+    db.session.commit()
+    return jsonify({"message": f"Customer {customer_id} deleted successfully"}), 200
