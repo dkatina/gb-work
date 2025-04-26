@@ -24,7 +24,7 @@ def create_mechanic():
 
 # Endpoint to GET ALL mechanics with validation error handling
 @mechanics_bp.route('/', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds
+@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_mechanics():
     try:
         mechanics = Mechanic.query.all()
@@ -34,7 +34,7 @@ def get_mechanics():
 
 # Endpoint to GET a SPECIFIC mechanic by ID with validation error handling
 @mechanics_bp.route('/<int:id>', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds
+@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_mechanic(id):
     try:
         mechanic = Mechanic.query.get_or_404(id)

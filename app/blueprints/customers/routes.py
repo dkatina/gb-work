@@ -24,7 +24,7 @@ def create_customer():
 
 # Endpoint to GET ALL customers with validation error handling
 @customers_bp.route('/', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds
+@cache.cached(timeout=60)  # Cache the response for 60 seconds to
 def get_customers():
     try:
         customers = Customer.query.all()
@@ -34,7 +34,7 @@ def get_customers():
 
 # Endpoint to GET a SPECIFIC customer by ID with validation error handling
 @customers_bp.route('/<int:id>', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds
+@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_customer(id):
     try:
         customer = Customer.query.get_or_404(id)
