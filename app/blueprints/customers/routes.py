@@ -72,13 +72,38 @@ def get_customer(id):
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+# Endpoint to GET the service tickets for a specific customer using token authentication and validation error handling
+@customers_bp.route('/<int:id>/my-tickets', methods=['GET'])
+@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
+@token_required
+def get_customer_service_tickets(customer_id):
+    try:
+        query = select(Customer).where(Customer.id == customer_id)
+        customer = db.session.execute(query).scalars().first()
+        
+        if not customer:
+            return jsonify({"error": "Customer not found"}), 404
+        
+        service_tickets = customer.service_tickets  
+        return customers_schema.jsonify(service_tickets), 200
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing customer with validation error handling
 @customers_bp.route('/<int:id>', methods=['PUT'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
-def update_customer(id):
+@token_required
+def update_customer(customer_id): # Receiving customer_id from the token
     try:
-        customer = Customer.query.get_or_404(id)
+        query = select(Customer).where(Customer.id == customer_id)
+        customer = db.session.execute(query).scalars().first()
+        
+        if not customer:
+            return jsonify({"error": "Customer not found"}), 404
+        
         data = request.get_json()
         customer_schema = CustomerSchema()
         customer = customer_schema.load(data, instance=customer, session=db.session)
