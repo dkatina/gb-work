@@ -1,9 +1,38 @@
+import select
 from app.blueprints.customers import customers_bp
 from app.blueprints.customers.customersSchemas import CustomerSchema, customers_schema
 from app.models import db, Customer
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
+from app.utils.util import encode_token
+
+# Customer Login
+@customers_bp.route('/login', methods=['POST'])
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
+def login_customer():
+    try:
+        credentials = request.get_json()
+        username = credentials.get('email')
+        password = credentials.get('password')
+    except KeyError:
+        return jsonify({"error": "Invalid credentials, expecting username and password"}), 400
+
+    query = select(Customer).where(Customer.email == username)
+    customer = db.session.execute(query).scalar_one_or_none() # Fetch the customer by email
+    if customer and customer.check_password(password):
+        auth_token = encode_token(customer.id)
+        
+        response = {
+            "status": "success",
+            "message": "Login successful",
+            "auth_token": auth_token,
+        }
+
+        return jsonify(response), 200
+    else:
+        return jsonify({"error": "Invalid email or password credentials"}), 401
+
 
 # Customers Endpoints
 # Endpoint to CREATE a new customer with validation error handling
