@@ -3,7 +3,7 @@ from app.blueprints.customers.customersSchemas import CustomerSchema, customers_
 from app.models import db, Customer
 from flask import jsonify, request
 from marshmallow import ValidationError
-from app.extensions import limiter
+from app.extensions import limiter, cache
 
 # Customers Endpoints
 # Endpoint to CREATE a new customer with validation error handling
@@ -24,6 +24,7 @@ def create_customer():
 
 # Endpoint to GET ALL customers with validation error handling
 @customers_bp.route('/', methods=['GET'])
+@cache.cached(timeout=60)  # Cache the response for 60 seconds
 def get_customers():
     try:
         customers = Customer.query.all()
@@ -33,6 +34,7 @@ def get_customers():
 
 # Endpoint to GET a SPECIFIC customer by ID with validation error handling
 @customers_bp.route('/<int:id>', methods=['GET'])
+@cache.cached(timeout=60)  # Cache the response for 60 seconds
 def get_customer(id):
     try:
         customer = Customer.query.get_or_404(id)

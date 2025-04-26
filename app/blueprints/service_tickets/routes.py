@@ -3,7 +3,7 @@ from app.blueprints.service_tickets.service_ticketsSchemas import service_ticket
 from app.models import db, ServiceTicket
 from flask import jsonify, request
 from marshmallow import ValidationError
-from app.extensions import limiter
+from app.extensions import limiter, cache
 
 
 # Service Tickets Endpoints
@@ -24,6 +24,7 @@ def create_service_ticket():
 
 # Endpoint to GET ALL service tickets with validation error handling
 @service_tickets_bp.route('/', methods=['GET'])
+@cache.cached(timeout=60)  # Cache the response for 60 seconds
 def get_service_tickets():
     try:
         service_tickets = ServiceTicket.query.all()
@@ -33,6 +34,7 @@ def get_service_tickets():
 
 # Endpoint to GET a SPECIFIC service ticket by ID with validation error handling
 @service_tickets_bp.route('/<int:id>', methods=['GET'])
+@cache.cached(timeout=60)  # Cache the response for 60 seconds
 def get_service_ticket(id):
     try:
         service_ticket = ServiceTicket.query.get_or_404(id)

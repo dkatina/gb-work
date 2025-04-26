@@ -3,7 +3,7 @@ from app.blueprints.mechanics.mechanicsSchemas import MechanicSchema, mechanics_
 from app.models import db, Mechanic
 from flask import jsonify, request
 from marshmallow import ValidationError
-from app.extensions import limiter
+from app.extensions import limiter, cache
 
 # Mechanics Endpoints
 # Endpoint to create a new mechanic with validation error handling
@@ -24,6 +24,7 @@ def create_mechanic():
 
 # Endpoint to GET ALL mechanics with validation error handling
 @mechanics_bp.route('/', methods=['GET'])
+@cache.cached(timeout=60)  # Cache the response for 60 seconds
 def get_mechanics():
     try:
         mechanics = Mechanic.query.all()
@@ -33,6 +34,7 @@ def get_mechanics():
 
 # Endpoint to GET a SPECIFIC mechanic by ID with validation error handling
 @mechanics_bp.route('/<int:id>', methods=['GET'])
+@cache.cached(timeout=60)  # Cache the response for 60 seconds
 def get_mechanic(id):
     try:
         mechanic = Mechanic.query.get_or_404(id)
