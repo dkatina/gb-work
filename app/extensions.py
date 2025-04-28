@@ -7,22 +7,20 @@ from flask_caching import Cache
 # Marshmallow for serialization and deserialization
 ma = Marshmallow()
 
+# Error handling for rate limiting
+def rate_limit_error(e):
+    return jsonify({
+        "error": "Rate limit exceeded. Please try again later.",
+        "message": "You have exceeded the allowed number of requests.",
+        "code": 429,
+    }), 429
+    
 # Flask-Limiter for rate limiting
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour"],
-    default_limit_exempt_when=lambda: False,
-    default_limit_exempt_when_func=lambda: False,
+    on_breach=rate_limit_error
 )
-
-# Error handling for rate limiting
-@limiter.error_handler
-def rate_limit_error(e):
-    return jsonify({
-        "error": "Rate limit exceeded. Please try again later.",
-        "message": str(e.description),
-        "code": e.code,
-    }), e.code
     
 # Flask-Caching for caching
 cache = Cache(config={'CACHE_TYPE': 'simple'})

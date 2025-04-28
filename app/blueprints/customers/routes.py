@@ -1,4 +1,4 @@
-import select
+from sqlalchemy import select
 from app.blueprints.customers import customers_bp
 from app.blueprints.customers.customersSchemas import CustomerSchema, customers_schema
 from app.models import db, Customer
@@ -115,7 +115,7 @@ def update_customer(customer_id): # Receiving customer_id from the token
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to DELETE a customer with validation error handling and requires token authentication
-@customers_bp.route('/<int:id>', methods=['DELETE'])
+@customers_bp.route('/<int:customer_id>', methods=['DELETE'])
 @limiter.limit("2 per day")
 @token_required
 def delete_customer(customer_id): # Receiving customer_id from the token
