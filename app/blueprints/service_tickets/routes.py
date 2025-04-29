@@ -80,15 +80,13 @@ def update_service_ticket(service_ticket_id):
 @service_tickets_bp.route('/<int:service_ticket_id>', methods=['DELETE'])
 @limiter.limit("2 per day")
 def delete_service_ticket(service_ticket_id):
-    try:
-        service_ticket = ServiceTicket.query.get_or_404(service_ticket_id)
-        db.session.delete(service_ticket)
-        db.session.commit()
-        return jsonify({"message": "Service ticket deleted successfully"}), 200
-    except ValidationError as err:
-        return jsonify(err.messages), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    query = select(ServiceTicket).where(ServiceTicket.id == service_ticket_id)
+    service_ticket = db.session.execute(query).scalars().first()
+    
+    db.session.delete(service_ticket)
+    db.session.commit()
+    return jsonify({"message": f"Service ticket {service_ticket_id} deleted successfully"}), 200
+
 
 
 
