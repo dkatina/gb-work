@@ -51,7 +51,31 @@ def create_customer():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to GET ALL customers with validation error handling
+# Endpoint to GET ALL customers using pagination and has validation error handling
+@customers_bp.route('/', methods=['GET'])
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
+def get_customers():
+     try:
+         # Setting default values for page and per_page
+         page = int(request.args.get('page', 1))
+         per_page = int(request.args.get('per_page', 10))
+         query = select (Customer)
+         pagination = db.paginate(query, page=page, per_page=per_page)
+         
+         return jsonify({
+             "customers": customers_schema.dump(pagination.items),
+             "total": pagination.total,
+                "page": pagination.page,
+                "per_page": pagination.per_page,
+                "current_page": pagination.page,
+         }), 200
+         
+     except ValidationError as err:
+         return jsonify(err.messages), 400
+     except Exception as e:
+         return jsonify({"error": str(e)}), 500
+
+"""
 @customers_bp.route('/', methods=['GET'])
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to
 def get_customers():
@@ -60,6 +84,7 @@ def get_customers():
         return customers_schema.jsonify(customers), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+"""
 
 # Endpoint to GET a SPECIFIC customer by ID with validation error handling
 @customers_bp.route('/<int:id>', methods=['GET'])
