@@ -1,6 +1,7 @@
+from sqlalchemy import select
 from app.blueprints.service_tickets import service_tickets_bp
-from app.blueprints.service_tickets.service_ticketsSchemas import service_tickets_schema, service_ticket_schema  
-from app.models import db, ServiceTicket
+from app.blueprints.service_tickets.service_ticketsSchemas import service_tickets_schema, service_ticket_schema, update_service_ticket_schema
+from app.models import Mechanic, db, ServiceTicket
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
@@ -33,11 +34,11 @@ def get_service_tickets():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to GET a SPECIFIC service ticket by ID with validation error handling
-@service_tickets_bp.route('/<int:id>', methods=['GET'])
+@service_tickets_bp.route('/<int:service_ticket_id>', methods=['GET'])
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
-def get_service_ticket(id):
+def get_service_ticket(service_ticket_id):
     try:
-        service_ticket = ServiceTicket.query.get_or_404(id)
+        service_ticket = ServiceTicket.query.get_or_404(service_ticket_id)
         return service_ticket_schema.jsonify(service_ticket), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
@@ -45,26 +46,42 @@ def get_service_ticket(id):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing service ticket with validation error handling
-@service_tickets_bp.route('/<int:id>', methods=['PUT'])
+@service_tickets_bp.route('/<int:service_ticket_id>', methods=['PUT'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
-def update_service_ticket(id):
+def update_service_ticket(service_ticket_id):
     try:
-        service_ticket = ServiceTicket.query.get_or_404(id)
-        data = request.get_json()
-        service_ticket = service_ticket_schema.load(data, instance=service_ticket, session=db.session)
-        db.session.commit()
-        return service_ticket_schema.jsonify(service_ticket), 200
+        service_ticket_update = update_service_ticket_schema.load(request.json)
     except ValidationError as err:
         return jsonify(err.messages), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    
+    query = select(ServiceTicket).where(ServiceTicket.id == service_ticket_id)
+    service_ticket = db.session.execute(query).scalars().first()
+    
+    for mechanic_id in service_ticket_update['add_mechanic_ids']:
+        query = select(Mechanic).where(Mechanic.id == mechanic_id)
+        mechanic = db.session.execute(query).scalars().first()
+        
+        if mechanic and mechanic not in service_ticket.mechanics:
+            service_ticket.mechanics.append(mechanic)
+            
+    for mechanic_id in service_ticket_update['remove_mechanic_ids']:
+        query = select(Mechanic).where(Mechanic.id == mechanic_id)
+        mechanic = db.session.execute(query).scalars().first()
+        
+        if mechanic and mechanic in service_ticket.mechanics:
+            service_ticket.mechanics.remove(mechanic)
+
+    db.session.commit()
+    return service_ticket_schema.jsonify(service_ticket), 200
+
+
 
 # Endpoint to DELETE a service ticket with validation error handling
-@service_tickets_bp.route('/<int:id>', methods=['DELETE'])
+@service_tickets_bp.route('/<int:service_ticket_id>', methods=['DELETE'])
 @limiter.limit("2 per day")
-def delete_service_ticket(id):
+def delete_service_ticket(service_ticket_id):
     try:
-        service_ticket = ServiceTicket.query.get_or_404(id)
+        service_ticket = ServiceTicket.query.get_or_404(service_ticket_id)
         db.session.delete(service_ticket)
         db.session.commit()
         return jsonify({"message": "Service ticket deleted successfully"}), 200
@@ -72,3 +89,6 @@ def delete_service_ticket(id):
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+

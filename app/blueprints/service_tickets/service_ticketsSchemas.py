@@ -1,10 +1,12 @@
 from app.models import Mechanic, ServiceTicket
 from app.extensions import ma
-from marshmallow import ValidationError, post_load
+from marshmallow import ValidationError, post_load, fields
 
 
 class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
     mechanic_ids = ma.Method("get_mechanic_ids", deserialize="load_mechanic_ids")
+    mechanics = fields.Nested('MechanicSchema', many=True)
+    customer = fields.Nested('CustomerSchema')
     
     class Meta:
         model = ServiceTicket
@@ -29,7 +31,22 @@ class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
         mechanics = data.pop('mechanic_ids', [])
         data['mechanics'] = mechanics
         return data
+        
+class UpdateServiceTicketSchema(ma.Schema):
+    add_mechanic_ids = fields.List(fields.Int(), required=True)
+    remove_mechanic_ids = fields.List(fields.Int(), required=True)
+    class Meta:
+        fields = ('add_mechanic_ids', 'remove_mechanic_ids')
+    
     
 # Instances for serialization    
 service_ticket_schema = ServiceTicketSchema()
 service_tickets_schema = ServiceTicketSchema(many=True)
+update_service_ticket_schema = UpdateServiceTicketSchema()
+
+
+'''
+
+
+
+'''
