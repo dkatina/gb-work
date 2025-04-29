@@ -93,7 +93,7 @@ def get_customer_service_tickets(customer_id):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing customer with validation error handling
-@customers_bp.route('/<int:id>', methods=['PUT'])
+@customers_bp.route('/<int:customer_id>', methods=['PUT'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 @token_required
 def update_customer(customer_id): # Receiving customer_id from the token
