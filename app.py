@@ -1,24 +1,21 @@
 from app import create_app
 from app.models import db
 import os
-from app.config import DevelopmentConfig, TestingConfig, ProductionConfig
+from app.config import config_by_name
+from dotenv import load_dotenv
 
-# Getting environment settings from env but will default to DevelopmentConfig if not set
-flask_env = os.getenv('FLASK_ENV', 'development')
+# Load .env
+load_dotenv()
 
-# Setting config class based on the environment variable
-if flask_env == 'development':
-    config_class = DevelopmentConfig
-elif flask_env == 'testing':
-    config_class = TestingConfig
-elif flask_env == 'production': 
-    config_class = ProductionConfig
-else:
-    config_class = DevelopmentConfig # Default to DevelopmentConfig if FLASK_ENV is not set
-    
-print(f"Using configuration: {config_class.__name__}") # Debugging line to check which config is being used
+# Determine config name
+env = os.getenv('FLASK_ENV', 'development')
+config_class = config_by_name.get(env, config_by_name['development'])
 
-app = create_app(config_class)
+print(f"Using configuration: {config_class.__name__}")
+
+config_name = os.getenv("FLASK_ENV", "development")
+
+app = create_app(config_name)
 
 with app.app_context():
     db.create_all()

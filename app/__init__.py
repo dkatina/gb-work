@@ -4,14 +4,14 @@ from app.extensions import ma, limiter, cache
 from app.blueprints.customers import customers_bp
 from app.blueprints.service_tickets import service_tickets_bp
 from app.blueprints.mechanics import mechanics_bp
-from app.config import DevelopmentConfig, TestingConfig, ProductionConfig
+from app.config import config_by_name
 
-def create_app(config_class):
+def create_app(config_name):
     
     app = Flask(__name__)
     
     # Config setup
-    app.config.from_object(config_class)
+    app.config.from_object(config_by_name[config_name])
     
     # Initialize extensions
     db.init_app(app)
