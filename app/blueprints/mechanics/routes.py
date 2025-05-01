@@ -5,7 +5,7 @@ from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
 
-# Mechanics Endpoints
+# ---------------- Mechanics Endpoints --------------------
 # Endpoint to create a new mechanic with validation error handling
 @mechanics_bp.route('/', methods=['POST'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")

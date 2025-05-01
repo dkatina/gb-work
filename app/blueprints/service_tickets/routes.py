@@ -7,7 +7,7 @@ from marshmallow import ValidationError
 from app.extensions import limiter, cache
 
 
-# Service Tickets Endpoints
+# ---------------------- Service Tickets Endpoints ---------------------
 # Endpoint to CREATE a new service ticket with validation error handling
 @service_tickets_bp.route('/', methods=['POST'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
