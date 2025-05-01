@@ -6,12 +6,12 @@ from app.blueprints.service_tickets import service_tickets_bp
 from app.blueprints.mechanics import mechanics_bp
 from app.config import config_by_name
 
-def create_app(config_name):
+def create_app(config_class):
     
     app = Flask(__name__)
     
     # Config setup
-    app.config.from_object(config_by_name[config_name])
+    app.config.from_object(config_class)
     
     # Initialize extensions
     db.init_app(app)
