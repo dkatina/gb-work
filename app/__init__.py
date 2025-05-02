@@ -7,6 +7,7 @@ from app.blueprints.mechanics import mechanics_bp
 from app.config import config_by_name
 from flask_migrate import Migrate
 from app.blueprints.authentication import authentications_bp
+from app.blueprints.inventory import inventory_bp
 
 migrate = Migrate()
 
@@ -29,6 +30,7 @@ def create_app(config_class):
     app.register_blueprint(service_tickets_bp, url_prefix='/service_tickets')
     app.register_blueprint(mechanics_bp, url_prefix='/mechanics')
     app.register_blueprint(authentications_bp, url_prefix='/auth')
+    app.register_blueprint(inventory_bp, url_prefix='/inventory')
     
 
     return app

@@ -55,6 +55,9 @@ class Mechanic(db.Model):
     salary = Column(Integer, nullable=False)
     password_hash = Column(String(255), nullable=False)
     
+    # Relationship with the ServiceTicket class
+    service_tickets = relationship('ServiceTicket', secondary='service_mechanics', back_populates='mechanics', lazy=True)
+    
     # Password Setter
     def set_password(self, password):
         """Hash the password and store it in the database."""
@@ -89,8 +92,15 @@ class ServiceTicket(db.Model):
     # Relationship with the Customer class and Mechanic class
     customer = relationship('Customer', back_populates='service_tickets', lazy=True)
     mechanics = relationship('Mechanic', secondary='service_mechanics', back_populates='service_tickets', lazy=True)
+    
     # Relationship with the Inventory class as many-to-many where one service ticket can have many inventory items and one inventory item can belong to many service tickets
-    inventory_items = relationship('Inventory', secondary='inventory_service_tickets', back_populates='service_tickets', lazy=True)
+    inventory_items = relationship('Inventory', 
+                                   secondary='inventory_service_tickets', 
+                                   back_populates='service_tickets', 
+                                   lazy=True, 
+                                   primaryjoin='InventoryServiceTicket.service_ticket_id==ServiceTicket.id', 
+                                   secondaryjoin='InventoryServiceTicket.inventory_id==Inventory.id',
+                                   overlaps='inventory_links')
     inventory_links = relationship('InventoryServiceTicket', back_populates='service_ticket', lazy=True)
     
 # Service_Mechanics class
@@ -110,7 +120,11 @@ class Inventory(db.Model):
     price = Column(Float, nullable=False)
     
     # Relationship with the ServiceTicket class as many-to-many where one service ticket can have many inventory items and one inventory item can belong to many service tickets
-    service_tickets = relationship('ServiceTicket', back_populates='inventory_items', lazy=True)
+    service_tickets = relationship('ServiceTicket',
+                                   secondary='inventory_service_tickets',
+                                   back_populates='inventory_items', 
+                                   lazy=True,
+                                   overlaps='inventory_links')
     inventory_links = relationship('InventoryServiceTicket', back_populates='inventory', lazy=True)
     
 # InventoryServiceTicket class junction table between Inventory and ServiceTicket
@@ -122,5 +136,5 @@ class InventoryServiceTicket(db.Model):
     quantity = Column(Integer, nullable=False, default=1)  # Quantity of the inventory item used in the service ticket
     
     # Relationship with the Inventory class and ServiceTicket class
-    inventory = relationship('Inventory', back_populates='service_tickets', lazy=True)
-    service_ticket = relationship('ServiceTicket', back_populates='inventory', lazy=True)
+    inventory = relationship('Inventory', back_populates='inventory_links', lazy=True)
+    service_ticket = relationship('ServiceTicket', back_populates='inventory_links', lazy=True)
