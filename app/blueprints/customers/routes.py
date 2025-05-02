@@ -32,7 +32,7 @@ def get_customers():
      try:
          # Setting default values for page and per_page
          page = int(request.args.get('page', 1))
-         per_page = int(request.args.get('per_page', 10))
+         per_page = min(int(request.args.get('per_page', 10)), 100)  # Limit per_page to a maximum of 100
          query = select (Customer)
          pagination = db.paginate(query, page=page, per_page=per_page)
          
@@ -42,6 +42,9 @@ def get_customers():
                 "page": pagination.page,
                 "per_page": pagination.per_page,
                 "current_page": pagination.page,
+                "total_pages": pagination.pages,
+                "has_next": pagination.has_next,
+                "has_prev": pagination.has_prev,
          }), 200
          
      except ValidationError as err:

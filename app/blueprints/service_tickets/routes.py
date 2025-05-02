@@ -34,10 +34,6 @@ def get_service_tickets():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
-
-
 # Endpoint to GET ALL service tickets for a specific customer requiring authentication and uses validation error handling
 @service_tickets_bp.route('/my-tickets', methods=['GET'])
 @token_required
@@ -58,12 +54,6 @@ def get_my_tickets(current_user):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
-
-
-
-
 # Endpoint to GET a SPECIFIC service ticket by ID with validation error handling
 @service_tickets_bp.route('/<int:service_ticket_id>', methods=['GET'])
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
@@ -77,7 +67,7 @@ def get_service_ticket(service_ticket_id):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing service ticket with validation error handling
-@service_tickets_bp.route('/<int:service_ticket_id>', methods=['PUT'])
+@service_tickets_bp.route('/<int:service_ticket_id>/edit', methods=['PUT'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_service_ticket(service_ticket_id):
     try:
