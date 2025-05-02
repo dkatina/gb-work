@@ -5,6 +5,10 @@ from app.blueprints.customers import customers_bp
 from app.blueprints.service_tickets import service_tickets_bp
 from app.blueprints.mechanics import mechanics_bp
 from app.config import config_by_name
+from flask_migrate import Migrate
+from app.blueprints.authentication import authentications_bp
+
+migrate = Migrate()
 
 def create_app(config_class):
     
@@ -15,6 +19,7 @@ def create_app(config_class):
     
     # Initialize extensions
     db.init_app(app)
+    migrate.init_app(app, db)
     ma.init_app(app)
     limiter.init_app(app)
     cache.init_app(app)
@@ -23,6 +28,7 @@ def create_app(config_class):
     app.register_blueprint(customers_bp, url_prefix='/customers')
     app.register_blueprint(service_tickets_bp, url_prefix='/service_tickets')
     app.register_blueprint(mechanics_bp, url_prefix='/mechanics')
+    app.register_blueprint(authentications_bp, url_prefix='/auth')
     
 
     return app

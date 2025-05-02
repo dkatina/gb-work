@@ -49,17 +49,6 @@ def get_customers():
      except Exception as e:
          return jsonify({"error": str(e)}), 500
 
-"""
-@customers_bp.route('/', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds to
-def get_customers():
-    try:
-        customers = Customer.query.all()
-        return customers_schema.jsonify(customers), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-"""
-
 # Endpoint to GET a SPECIFIC customer by ID with validation error handling
 @customers_bp.route('/<int:id>', methods=['GET'])
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
@@ -94,7 +83,7 @@ def get_customer_service_tickets(customer_id):
 # Endpoint to UPDATE an existing customer with validation error handling
 @customers_bp.route('/<int:customer_id>', methods=['PUT'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
-@token_required
+#@token_required
 def update_customer(customer_id): # Receiving customer_id from the token
     try:
         query = select(Customer).where(Customer.id == customer_id)

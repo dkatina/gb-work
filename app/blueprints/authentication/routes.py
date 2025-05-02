@@ -37,8 +37,7 @@ def login_customer():
                 "id": customer.id,
                 "name": customer.name,
                 "email": customer.email,
-                "phone_number": customer.phone_number,
-                "address": customer.address
+                "phone": customer.phone,
             },
     }), 200
     

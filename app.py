@@ -6,6 +6,7 @@ from app import create_app
 from app.models import db
 import os
 from app.config import config_by_name
+from flask.cli import with_appcontext
 
 # Print to debug the loading of the .env variables
 print(f"DB_USER: {os.getenv('DB_USER')}, DB_PASSWORD: {os.getenv('DB_PASSWORD')}")
