@@ -28,7 +28,7 @@ def login_customer():
     customer = db.session.execute(query).scalar_one_or_none() # Fetch the customer by email
     
     if customer and customer.check_password(password):
-        auth_token = encode_token(customer.id)
+        auth_token = encode_token(customer.id, user_type='customer') # Generate auth token for the customer
         return jsonify({
             "status": "success",
             "message": "Successfully logged in",

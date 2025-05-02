@@ -1,10 +1,11 @@
 from sqlalchemy import select
 from app.blueprints.service_tickets import service_tickets_bp
 from app.blueprints.service_tickets.service_ticketsSchemas import service_tickets_schema, service_ticket_schema, update_service_ticket_schema
-from app.models import Mechanic, db, ServiceTicket
+from app.models import Customer, Mechanic, db, ServiceTicket
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
+from app.utils.util import encode_token, token_required
 
 
 # ---------------------- Service Tickets Endpoints ---------------------
@@ -32,6 +33,36 @@ def get_service_tickets():
         return service_tickets_schema.jsonify(service_tickets), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+
+
+# Endpoint to GET ALL service tickets for a specific customer requiring authentication and uses validation error handling
+@service_tickets_bp.route('/my-tickets', methods=['GET'])
+@token_required
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
+def get_my_tickets(current_user):
+    try:
+        if isinstance(current_user, Customer):
+            customer_id = current_user.id
+            service_tickets = ServiceTicket.query.filter_by(customer_id=customer_id).all()
+        elif isinstance(current_user, Mechanic):
+            mechanic_id = current_user.id
+            service_tickets = ServiceTicket.query.filter(ServiceTicket.mechanics.any(id=mechanic_id)).all()
+        else:
+            return jsonify({"error": "Invalid user type"}), 400
+        return service_tickets_schema.jsonify(service_tickets), 200
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
+
 
 # Endpoint to GET a SPECIFIC service ticket by ID with validation error handling
 @service_tickets_bp.route('/<int:service_ticket_id>', methods=['GET'])

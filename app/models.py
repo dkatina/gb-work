@@ -69,7 +69,7 @@ class ServiceTicket(db.Model):
     __tablename__ = 'service_tickets'
     id = Column(Integer, primary_key=True)
     customer_id = Column(Integer, ForeignKey('customers.id'), nullable=False)
-    vin = Column(String(17), nullable=False, unique=True)
+    vin = Column(String(17), nullable=False)
     service_date = Column(DateTime, nullable=False, default=datetime.utcnow)
     service_desc = Column(String(200), nullable=False)
     
