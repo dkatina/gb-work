@@ -42,33 +42,26 @@ def get_inventory(id):
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-# Endpoint to do a search for an inventory item by name using GET with query parameters and validation error handling
-@inventory_bp.route('/search', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
-def search_inventory():
-    try:
-        name = request.args.get('name')
-        if not name:
-            return jsonify({"error": "Name query parameter is required"}), 400
-        
-        inventory_items = Inventory.query.filter(Inventory.name.ilike(f"%{name}%")).all()
-        return inventorys_schema.jsonify(inventory_items), 200
-    except ValidationError as err:
-        return jsonify(err.messages), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing inventory item with validation error handling
 @inventory_bp.route('/<int:id>', methods=['PUT'])
-@limiter.limit("10 per minute; 20 per hour; 100 per day")
+#@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_inventory(id):
     try:
-        inventory_items = Inventory.query.get_or_404(id)
+        print(f"Updating inventory item with ID: {id}")
+        # Fetching the inventory item by ID or raising a 404 error if not found
+        inventory_item = Inventory.query.get_or_404(id)
+        print(f"Found inventory item: {inventory_item}")
+        # Getting data from the request body
         data = request.get_json()
-        inventory_items = inventory_schema.load(data, instance=inventory_items, session=db.session)
+        print(f"Data to update: {data}")
+        # Loading the data into the schema for validation and updating
+        updated_inventory_item = inventory_schema.load(data, instance=inventory_item, session=db.session)
+        print(f"Updated inventory item: {updated_inventory_item}")
+        # Committing the changes to the database
         db.session.commit()
-        return inventory_schema.jsonify(inventory_items), 200
+        # Returning the updated inventory item as a JSON response
+        return inventory_schema.jsonify(updated_inventory_item), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:

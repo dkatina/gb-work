@@ -12,12 +12,13 @@ class MechanicSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
         
     @post_load
-    def make_mechanic(self, data, **kwargs):
+    def hash_password(self, data, **kwargs):
         password = data.pop('password', None)
-        mechanic = Mechanic(**data)
         if password:
-            mechanic.set_password(password)
-        return mechanic
+            mech = Mechanic()
+            mech.set_password(password)
+            data['password_hash'] = mech.password_hash
+        return data
     
 mechanic_schema = MechanicSchema()
 mechanics_schema = MechanicSchema(many=True)

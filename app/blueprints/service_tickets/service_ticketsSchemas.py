@@ -1,18 +1,20 @@
 from app.models import Mechanic, ServiceTicket
 from app.extensions import ma
 from marshmallow import ValidationError, post_load, fields
+from app.blueprints.inventory.inventorySchemas import InventorySchema
 
 
 class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
     mechanic_ids = ma.Method("get_mechanic_ids", deserialize="load_mechanic_ids")
     mechanics = fields.Nested('MechanicSchema', many=True)
     customer = fields.Nested('CustomerSchema')
+    inventory_items = fields.Nested(InventorySchema, many=True)
     
     class Meta:
         model = ServiceTicket
         load_instance = True
         include_fk = True
-        fields = ('mechanic_ids', 'customer_id', 'service_date', 'vin', 'service_desc')
+        fields = ('mechanic_ids', 'customer_id', 'service_date', 'vin', 'service_desc', 'inventory_items')
         
     def get_mechanic_ids(self, obj):
         return [mechanic.id for mechanic in obj.mechanics]

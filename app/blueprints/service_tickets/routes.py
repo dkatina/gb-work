@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from app.blueprints.service_tickets import service_tickets_bp
 from app.blueprints.service_tickets.service_ticketsSchemas import service_tickets_schema, service_ticket_schema, update_service_ticket_schema
-from app.models import Customer, Mechanic, db, ServiceTicket
+from app.models import Customer, Inventory, InventoryServiceTicket, Mechanic, db, ServiceTicket
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
@@ -95,6 +95,42 @@ def update_service_ticket(service_ticket_id):
     db.session.commit()
     return service_ticket_schema.jsonify(service_ticket), 200
 
+
+# Endpoint to Add a part to an existing service ticket with validation error handling
+@service_tickets_bp.route('/<int:service_ticket_id>/add_part', methods=['PUT'])
+@limiter.limit("10 per minute; 20 per hour; 100 per day")
+def add_part_to_service_ticket(service_ticket_id):
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+        
+        # Get the service ticket and inventory item from the database
+        service_ticket = ServiceTicket.query.get_or_404(service_ticket_id)
+        inventory_item = Inventory.query.get_or_404(data['inventory_id'])
+        
+        # Check if the inventory item is already linked to the service ticket
+        existing_link = InventoryServiceTicket.query.filter_by(
+            service_ticket_id=service_ticket.id,
+            inventory_id=inventory_item.id
+        ).first()
+        if existing_link:
+            return jsonify({"error": "This part is already linked to the service ticket"}), 400
+
+        # Create a new InventoryServiceTicket instance
+        inventory_service_ticket = InventoryServiceTicket(
+            inventory_id=inventory_item.id,
+            service_ticket_id=service_ticket.id,
+            quantity=data['quantity']
+        )
+        
+        db.session.add(inventory_service_ticket)
+        db.session.commit()
+        
+        return jsonify({"message": "Part added successfully", "inventory_service_ticket_id": inventory_service_ticket.id}), 201
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # Endpoint to DELETE a service ticket with validation error handling
