@@ -36,7 +36,6 @@ def get_service_tickets():
 
 # Endpoint to GET ALL service tickets for a specific customer requiring authentication and uses validation error handling
 @service_tickets_bp.route('/my-tickets', methods=['GET'])
-@token_required
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def get_my_tickets(current_user):
     try:

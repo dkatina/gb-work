@@ -1,0 +1,18 @@
+swagger: '2.0'
+info:
+  title: "Mechanic Shop API"
+  description: > 
+  The Mechanic Shop API allows clients to manage customers, mechanics, service tickets, inventory, and related operations.
+  It provides RESTful endpoints to create, retrieve, update, and delete records, supporting functionality such as
+  assigning mechanics to service tickets, updating inventory, assigning parts to service tickets, and managing customer profiles.
+  This API is designed to streamline the workflow of a mechanic shop and integrate with frontend or mobile interfaces.
+  version: "1.0.0"
+host: "127.0.0.1:5000"
+schemes:
+  - "http"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+paths: 
+definitions: 

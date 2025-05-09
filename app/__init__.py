@@ -8,6 +8,18 @@ from app.config import config_by_name
 from flask_migrate import Migrate
 from app.blueprints.authentication import authentications_bp
 from app.blueprints.inventory import inventory_bp
+from flask_swagger_ui import get_swaggerui_blueprint
+
+SWAGGER_URL = '/api/docs' # URL for exposing Swagger UI (without trailing '/')
+API_URL = '/static/swagger.yaml' # Our API url (can of course be a local resource)
+
+SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "Mechanic Shop API"
+    }
+)
 
 migrate = Migrate()
 
@@ -31,6 +43,7 @@ def create_app(config_class):
     app.register_blueprint(mechanics_bp, url_prefix='/mechanics')
     app.register_blueprint(authentications_bp, url_prefix='/auth')
     app.register_blueprint(inventory_bp, url_prefix='/inventory')
+    app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
     
 
     return app
