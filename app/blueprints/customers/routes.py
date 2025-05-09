@@ -68,13 +68,13 @@ def get_customer(id):
 @customers_bp.route('/<int:id>/my-tickets', methods=['GET'])
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 @token_required
-def get_customer_service_tickets(customer_id):
+def get_customer_service_tickets(user, customer_id):
     try:
-        query = select(Customer).where(Customer.id == customer_id)
-        customer = db.session.execute(query).scalars().first()
+        customer = Customer.query.get_or_404(customer_id)
         
-        if not customer:
-            return jsonify({"error": "Customer not found"}), 404
+        # Check if the customer_id in the token matches the customer_id in the URL
+        if user.id != customer_id:
+            return jsonify({"error": "Unauthorized access"}), 403
         
         service_tickets = customer.service_tickets  
         return customers_schema.jsonify(service_tickets), 200
@@ -87,13 +87,13 @@ def get_customer_service_tickets(customer_id):
 @customers_bp.route('/<int:customer_id>', methods=['PUT'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 @token_required
-def update_customer(customer_id): # Receiving customer_id from the token
+def update_customer(user, customer_id): # Receiving customer_id from the token
     try:
-        query = select(Customer).where(Customer.id == customer_id)
-        customer = db.session.execute(query).scalars().first()
+        customer = Customer.query.get_or_404(customer_id)
         
-        if not customer:
-            return jsonify({"error": "Customer not found"}), 404
+        # Check if the customer_id in the token matches the customer_id in the URL
+        if user.id != customer_id:
+            return jsonify({"error": "Unauthorized access"}), 403
         
         data = request.get_json()
         customer_schema = CustomerSchema()
@@ -109,10 +109,19 @@ def update_customer(customer_id): # Receiving customer_id from the token
 @customers_bp.route('/<int:customer_id>', methods=['DELETE'])
 @limiter.limit("2 per day")
 @token_required
-def delete_customer(customer_id): # Receiving customer_id from the token
-    query = select(Customer).where(Customer.id == customer_id)
-    customer = db.session.execute(query).scalars().first()
+def delete_customer(user, customer_id): # Receiving customer_id from the token
+    try:
+        customer = Customer.query.get_or_404(customer_id)
+        
+        # Check if the customer_id in the token matches the customer_id in the URL
+        if user.id != customer_id:
+            return jsonify({"error": "Unauthorized access"}), 403
     
-    db.session.delete(customer)
-    db.session.commit()
-    return jsonify({"message": f"Customer {customer_id} deleted successfully"}), 200
+        db.session.delete(customer)
+        db.session.commit()
+        return jsonify({"message": f"Customer {customer_id} deleted successfully"}), 200
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
