@@ -129,6 +129,135 @@ paths:
             description: "Customer deleted successfully."
           404:
             description: "Customer not found."
+
+    # ------------------------ Mechanics -----------------------
+    # Get all mechanics and create a new mechanic
+    /api/mechanics:
+      # Get all mechanics
+      get:
+        tags:
+          - "Mechanics"
+        summary: "Get all mechanics"
+        description: "Retrieve a list of all mechanics."
+        responses:
+          200:
+            description: "A list of mechanics."
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/Mechanic'
+      # Create a new mechanic
+      post:
+        tags:
+          - "Mechanics"
+        summary: "Create a new mechanic"
+        description: "Add a new mechanic to the system."
+        parameters:
+          - in: body
+            name: mechanic
+            required: true
+            schema:
+              $ref: '#/definitions/MechanicInput'
+        responses:
+          201:
+            description: "Mechanic created successfully."
+            schema:
+              $ref: '#/definitions/Mechanic'
+
+    # Get, update, and delete a specific mechanic by ID
+    /api/mechanics/{mechanic_id}:
+      # Get a specific mechanic by ID
+      get:
+        tags:
+          - "Mechanics"
+        summary: "Get a mechanic by ID"
+        description: "Retrieve a specific mechanic by their ID."
+        parameters:
+          - name: mechanic_id
+            in: path
+            required: true
+            type: integer
+        responses:
+          200:
+            description: "Mechanic details."
+            schema:
+              $ref: '#/definitions/Mechanic'
+          404:
+            description: "Mechanic not found."
+      # Update a specific mechanic by ID
+      put:
+        tags:
+          - "Mechanics"
+        summary: "Update a mechanic"
+        description: "Update an existing mechanic's information."
+        parameters:
+          - name: mechanic_id
+            in: path
+            required: true
+            type: integer
+          - in: body
+            name: mechanic
+            required: true
+            schema:
+              $ref: '#/definitions/MechanicInput'
+        responses:
+          200:
+            description: "Mechanic updated successfully."
+            schema:
+              $ref: '#/definitions/Mechanic'
+          404:
+            description: "Mechanic not found."
+      # Delete a specific mechanic by ID
+      delete:
+        tags:
+          - "Mechanics"
+        summary: "Delete a mechanic"
+        description: "Remove a mechanic from the system."
+        parameters:
+          - name: mechanic_id
+            in: path
+            required: true
+            type: integer
+        responses:
+          204:
+            description: "Mechanic deleted successfully."
+          404:
+            description: "Mechanic not found."
+    # Get the most worked mechanic
+    /api/mechanics/most-worked:
+      get:
+        tags:
+          - "Mechanics"
+        summary: "Get the most worked mechanic"
+        description: "Retrieve the mechanic who has worked the most."
+        responses:
+          200:
+            description: "Most worked mechanic details."
+            schema:
+              $ref: '#/definitions/Mechanic'
+          404:
+            description: "No mechanics found."
+    # Search mechanics by name
+    /api/mechanics/search:
+      get:
+        tags:
+          - "Mechanics"
+        summary: "Search mechanics by name"
+        description: "Retrieve a list of mechanics matching the search criteria."
+        parameters:
+          - name: name
+            in: query
+            required: true
+            type: string
+        responses:
+          200:
+            description: "A list of mechanics matching the search criteria."
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/Mechanic'
+          404:
+            description: "No mechanics found."
   
 
 definitions: 
@@ -165,9 +294,31 @@ definitions:
         type: string
         example: "success"
 # ------------------------ Customers ------------------------
+  CustomerInput:
+    type: object
+    required:
+      - name
+      - email
+      - phone_number
+      - password
+    properties:
+      name:
+        type: string
+        example: "John Doe"
+      email:
+        type: string
+        example: "john.doe@example.com"
+      phone_number:
+        type: string
+        example: "555-555-5555"
+      password:
+        type: string
+        example: "password123"
+
   Customer:
     type: object
     required:
+      - id
       - name
       - email
       - phone_number
@@ -181,6 +332,48 @@ definitions:
       email:
         type: string
         example: "john.doe@example.com"
+      phone_number:
+        type: string
+        example: "555-555-5555"
+# ------------------------ Mechanics -----------------------
+  MechanicInput:
+    type: object
+    required:
+      - name
+      - email
+      - phone_number
+      - password
+    properties:
+      name:
+        type: string
+        example: "Jane Smith"
+      email:
+        type: string
+        example: "jane.smith@example.com"
+      phone_number:
+        type: string
+        example: "555-555-5555"
+      password:
+        type: string
+        example: "password123"
+
+  Mechanic:
+    type: object
+    required:
+      - id
+      - name
+      - email
+      - phone_number
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: "Jane Smith"
+      email:
+        type: string
+        example: "jane.smith@example.com"
       phone_number:
         type: string
         example: "555-555-5555"
