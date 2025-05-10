@@ -2,10 +2,10 @@ swagger: '2.0'
 info:
   title: "Mechanic Shop API"
   description: > 
-  The Mechanic Shop API allows clients to manage customers, mechanics, service tickets, inventory, and related operations.
-  It provides RESTful endpoints to create, retrieve, update, and delete records, supporting functionality such as
-  assigning mechanics to service tickets, updating inventory, assigning parts to service tickets, and managing customer profiles.
-  This API is designed to streamline the workflow of a mechanic shop and integrate with frontend or mobile interfaces.
+    The Mechanic Shop API allows clients to manage customers, mechanics, service tickets, inventory, and related operations.
+    It provides RESTful endpoints to create, retrieve, update, and delete records, supporting functionality such as
+    assigning mechanics to service tickets, updating inventory, assigning parts to service tickets, and managing customer profiles.
+    This API is designed to streamline the workflow of a mechanic shop and integrate with frontend or mobile interfaces.
   version: "1.0.0"
 host: "127.0.0.1:5000"
 schemes:
@@ -15,4 +15,173 @@ consumes:
 produces:
   - "application/json"
 paths: 
+    # ------------------------ Customers ------------------------
+    # Customer login and registration
+    /api/customers/login:
+      post:
+        tags:
+          - "Customers"
+        summary: "Customer login"
+        description: "Authenticate a customer and return a token."
+        parameters:
+          - in: body
+            name: login_info
+            required: true
+            schema:
+              $ref: '#/definitions/Login'
+        responses:
+          200:
+            description: "Login successful."
+            schema:
+              $ref: '#/definitions/LoginResponse'
+          401:
+            description: "Invalid credentials."
+
+    # Get all customers and create a new customer      
+    /api/customers:
+      # Get all customers
+      get:
+        tags:
+          - "Customers"
+        summary: "Get all customers"
+        description: "Retrieve a list of all customers."
+        responses:
+          200:
+            description: "A list of customers."
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/Customer'
+      # Create a new customer
+      post:
+        tags:
+          - "Customers"
+        summary: "Create a new customer"
+        description: "Add a new customer to the system."
+        parameters:
+          - in: body
+            name: customer
+            required: true
+            schema:
+              $ref: '#/definitions/Customer'
+        responses:
+          201:
+            description: "Customer created successfully."
+            schema:
+              $ref: '#/definitions/Customer'
+
+    # Get, update, and delete a specific customer by ID
+    /api/customers/{customer_id}:
+      # Get a specific customer by ID
+      get:
+        tags:
+          - "Customers"
+        summary: "Get a customer by ID"
+        description: "Retrieve a specific customer by their ID."
+        parameters:
+          - name: customer_id
+            in: path
+            required: true
+            type: integer
+        responses:
+          200:
+            description: "Customer details."
+            schema:
+              $ref: '#/definitions/Customer'
+          404:
+            description: "Customer not found."
+      # Update a specific customer by ID
+      put:
+        tags:
+          - "Customers"
+        summary: "Update a customer"
+        description: "Update an existing customer's information."
+        parameters:
+          - name: customer_id
+            in: path
+            required: true
+            type: integer
+          - in: body
+            name: customer
+            required: true
+            schema:
+              $ref: '#/definitions/Customer'
+        responses:
+          200:
+            description: "Customer updated successfully."
+            schema:
+              $ref: '#/definitions/Customer'
+          404:
+            description: "Customer not found."
+      # Delete a specific customer by ID
+      delete:
+        tags:
+          - "Customers"
+        summary: "Delete a customer"
+        description: "Remove a customer from the system."
+        parameters:
+          - name: customer_id
+            in: path
+            required: true
+            type: integer
+        responses:
+          204:
+            description: "Customer deleted successfully."
+          404:
+            description: "Customer not found."
+  
+
 definitions: 
+  # ------------------------ Login -------------------------
+  Login:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        example: "john.doe@example.com"
+      password:
+        type: string
+        example: "password123"
+
+  LoginResponse:
+    type: object
+    properties:
+      token:
+        type: string
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+      user_id:
+        type: integer
+        example: 1
+      user_type:
+        type: string
+        example: "customer"
+      message:
+        type: string
+        example: "Login successful."
+      status:
+        type: string
+        example: "success"
+# ------------------------ Customers ------------------------
+  Customer:
+    type: object
+    required:
+      - name
+      - email
+      - phone_number
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: "John Doe"
+      email:
+        type: string
+        example: "john.doe@example.com"
+      phone_number:
+        type: string
+        example: "555-555-5555"
+
