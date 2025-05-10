@@ -15,8 +15,8 @@ consumes:
 produces:
   - "application/json"
 paths: 
-    # ------------------------ Customers / Mechanic Login ------------------------
-    # Customer login and registration
+    # ------------------------ Authentication Login for Customers / Mechanic ------------------------
+    # Authentication login and registration
     /api/auth/login:
       post:
         tags:
@@ -28,7 +28,7 @@ paths:
             name: login_info
             required: true
             schema:
-              $ref: '#/definitions/Login'
+              $ref: '#/definitions/LoginCredentials'
         responses:
           200:
             description: "Login successful."
@@ -517,7 +517,7 @@ paths:
 
 definitions: 
   # ------------------------ Login -------------------------
-  Login:
+  LoginCredentials:
     type: object
     required:
       - email
