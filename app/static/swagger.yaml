@@ -15,14 +15,14 @@ consumes:
 produces:
   - "application/json"
 paths: 
-    # ------------------------ Customers ------------------------
+    # ------------------------ Customers / Mechanic Login ------------------------
     # Customer login and registration
-    /api/customers/login:
+    /api/auth/login:
       post:
         tags:
-          - "Customers"
-        summary: "Customer login"
-        description: "Authenticate a customer and return a token."
+          - "Authentication"
+        summary: "User login"
+        description: "Authenticate a user (customer or mechanic) and return a token."
         parameters:
           - in: body
             name: login_info
@@ -37,6 +37,7 @@ paths:
           401:
             description: "Invalid credentials."
 
+    # ------------------------ Customers ------------------------
     # Get all customers and create a new customer      
     /api/customers:
       # Get all customers
