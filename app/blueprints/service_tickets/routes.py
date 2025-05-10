@@ -34,7 +34,7 @@ def get_service_tickets():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to GET ALL service tickets for a specific customer requiring authentication and uses validation error handling
+# Endpoint to GET ALL service tickets for a specific customer or mechanic requiring authentication and uses validation error handling
 @service_tickets_bp.route('/my-tickets', methods=['GET'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def get_my_tickets(current_user):
@@ -66,7 +66,7 @@ def get_service_ticket(service_ticket_id):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing service ticket with validation error handling
-@service_tickets_bp.route('/<int:service_ticket_id>/edit', methods=['PUT'])
+@service_tickets_bp.route('/<int:service_ticket_id>', methods=['PUT'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_service_ticket(service_ticket_id):
     try:

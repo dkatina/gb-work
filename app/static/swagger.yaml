@@ -258,7 +258,261 @@ paths:
                 $ref: '#/definitions/Mechanic'
           404:
             description: "No mechanics found."
-  
+
+    # ------------------------ Inventory -----------------------
+    # Get all inventory items and create a new inventory item
+    /api/inventory:
+      # Get all inventory items
+      get:
+        tags:
+          - "Inventory"
+        summary: "Get all inventory items"
+        description: "Retrieve a list of all items in the inventory."
+        responses:
+          200:
+            description: "A list of inventory items."
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/InventoryItem'
+      # Create a new inventory item
+      post:
+        tags:
+          - "Inventory"
+        summary: "Create a new inventory item"
+        description: "Add a new item to the inventory."
+        parameters:
+          - in: body
+            name: InventoryItem
+            required: true
+            schema:
+              $ref: '#/definitions/InventoryInput'
+        responses:
+          201:
+            description: "Inventory Item created successfully."
+            schema:
+              $ref: '#/definitions/InventoryItem'
+    # Get, update, and delete a specific Inventory Item by ID
+    /api/inventory/{inventory_id}:
+      # Get a specific inventory item by ID
+      get:
+        tags:
+          - "Inventory"
+        summary: "Get a inventory item by ID"
+        description: "Retrieve a specific inventory by its ID."
+        parameters:
+          - name: inventory_id
+            in: path
+            required: true
+            type: integer
+        responses:
+          200:
+            description: "Inventory Item details."
+            schema:
+              $ref: '#/definitions/InventoryItem'
+          404:
+            description: "Inventory Item not found."
+      # Update a specific Inventory Item by ID
+      put:
+        tags:
+          - "Inventory"
+        summary: "Update a Inventory Item"
+        description: "Update an existing Inventory Item's information."
+        parameters:
+          - name: inventory_id
+            in: path
+            required: true
+            type: integer
+          - in: body
+            name: inventory_item
+            required: true
+            schema:
+              $ref: '#/definitions/InventoryInput'
+        responses:
+          200:
+            description: "Inventory Item updated successfully."
+            schema:
+              $ref: '#/definitions/InventoryItem'
+          404:
+            description: "Inventory Item not found."
+      # Delete a specific Inventory Item by ID
+      delete:
+        tags:
+          - "Inventory"
+        summary: "Delete a Inventory Item"
+        description: "Remove a Inventory Item from the inventory."
+        parameters:
+          - name: inventory_id
+            in: path
+            required: true
+            type: integer
+        responses:
+          204:
+            description: "Inventory Item deleted successfully."
+          404:
+            description: "Inventory Item not found."
+    # Search inventory items by name
+    /api/inventory/search:
+      get:
+        tags:
+          - "Inventory"
+        summary: "Search inventory items by name"
+        description: "Retrieve a list of inventory items matching the search criteria."
+        parameters:
+          - name: name
+            in: query
+            required: true
+            type: string
+            description: "Name of the part to search for."
+        responses:
+          200:
+            description: "A list of inventory items matching the search criteria."
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/InventoryItem'
+          404:
+            description: "No inventory items found."
+    
+    # ------------------------ Service Tickets -----------------------
+    # Get all service tickets and create a new service ticket
+    /api/service-tickets:
+      # Get all service tickets
+      get:
+        tags:
+          - "Service Tickets"
+        summary: "Get all service tickets"
+        description: "Retrieve a list of all service tickets."
+        responses:
+          200:
+            description: "A list of service tickets."
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/ServiceTicket'
+      # Create a new service ticket
+      post:
+        tags:
+          - "Service Tickets"
+        summary: "Create a new service ticket"
+        description: "Add a new service ticket to the system."
+        parameters:
+          - in: body
+            name: service_ticket
+            required: true
+            schema:
+              $ref: '#/definitions/ServiceTicketInput'
+        responses:
+          201:
+            description: "Service ticket created successfully."
+            schema:
+              $ref: '#/definitions/ServiceTicket'
+    # Get, update, and delete a specific service ticket by ID
+    /api/service-tickets/{ticket_id}:
+      # Get a specific service ticket by ID
+      get:
+        tags:
+          - "Service Tickets"
+        summary: "Get a service ticket by ID"
+        description: "Retrieve a specific service ticket by its ID."
+        parameters:
+          - name: ticket_id
+            in: path
+            required: true
+            type: integer
+        responses:
+          200:
+            description: "Service ticket details."
+            schema:
+              $ref: '#/definitions/ServiceTicket'
+          404:
+            description: "Service ticket not found."
+      # Update a specific service ticket by ID
+      put:
+        tags:
+          - "Service Tickets"
+        summary: "Update a service ticket"
+        description: "Update an existing service ticket's information, including assigned mechanics."
+        parameters:
+          - name: ticket_id
+            in: path
+            required: true
+            type: integer
+          - in: body
+            name: service_ticket
+            required: true
+            schema:
+              $ref: '#/definitions/ServiceTicketInput'
+        responses:
+          200:
+            description: "Service ticket updated successfully."
+            schema:
+              $ref: '#/definitions/ServiceTicket'
+          404:
+            description: "Service ticket not found."
+      # Delete a specific service ticket by ID
+      delete:
+        tags:
+          - "Service Tickets"
+        summary: "Delete a service ticket"
+        description: "Remove a service ticket from the system."
+        parameters:
+          - name: ticket_id
+            in: path
+            required: true
+            type: integer
+        responses:
+          204:
+            description: "Service ticket deleted successfully."
+          404:
+            description: "Service ticket not found."
+    
+    # Assign parts to a service ticket
+    /api/service-tickets/{ticket_id}/add_part:
+      post:
+        tags:
+          - "Service Tickets"
+        summary: "Assign parts to a service ticket"
+        description: "Assign parts to a specific service ticket."
+        parameters:
+          - name: ticket_id
+            in: path
+            required: true
+            type: integer
+          - in: body
+            name: part_ids
+            required: true
+            schema:
+              type: object
+              properties:
+                part_ids:
+                  type: array
+                  items:
+                    type: integer
+                    example: [1, 2, 3]
+        responses:
+          200:
+            description: "Parts assigned successfully."
+          404:
+            description: "Service ticket or parts not found."
+    # Get all service tickets for a specific mechanic or customer as authenticated user
+    /api/service-tickets/my-tickets:
+      get:
+        tags:
+          - "Service Tickets"
+        summary: "Get all service tickets for current user"
+        description: "Retrieve a list of all service tickets assigned to the current user."
+        responses:
+          200:
+            description: "A list of service tickets for the authorized user, wheter they are a mechanic or customer."
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/ServiceTicket'
+          404:
+            description: "Unauthorized."
+          401:
+            description: "Unauthorized. Token missing or invalid."
 
 definitions: 
   # ------------------------ Login -------------------------
@@ -377,4 +631,92 @@ definitions:
       phone_number:
         type: string
         example: "555-555-5555"
+# ------------------------ Inventory -----------------------
+  InventoryInput:
+    type: object
+    required:
+      - name
+      - quantity
+      - price
+    properties:
+      name:
+        type: string
+        description: "Name of the part"
+        example: "Brake Pad"
+      quantity:
+        type: integer
+        description: "Quantity of the part in stock or to be assigned to a service ticket"
+        example: 50
+      price:
+        type: number
+        format: float
+        description: "Price of the part"
+        example: 29.99
+
+  InventoryItem:
+    type: object
+    required:
+      - id
+      - name
+      - quantity
+      - price
+    properties:
+      id:
+        type: integer
+        description: "Unique identifier for the part"
+        example: 1
+      name:
+        type: string
+        description: "Name of the part"
+        example: "Brake Pad"
+      quantity:
+        type: integer
+        description: "Quantity of the part in stock or to be assigned to a service ticket"
+        example: 50
+      price:
+        type: number
+        format: float
+        description: "Price of the part"
+        example: 29.99
+# ------------------------ Service Tickets -----------------------
+  ServiceTicketInput:
+    type: object
+    required:
+      - customer_id
+      - mechanic_id
+      - description
+    properties:
+      customer_id:
+        type: integer
+        example: 1
+      mechanic_ids:
+        type: array
+        items:
+          type: integer
+          example: [1, 2]
+      description:
+        type: string
+        example: "Oil change and tire rotation"
+
+  ServiceTicket:
+    type: object
+    required:
+      - id
+      - customer_id
+      - mechanic_id
+      - description
+      - status
+    properties:
+      id:
+        type: integer
+        example: 1
+      customer_id:
+        type: integer
+        example: 1
+      mechanic_id:
+        type: integer
+        example: 1
+      description:
+        type: string
+        example: "Oil change and tire rotation"
 

@@ -63,25 +63,6 @@ def get_customer(id):
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-# Endpoint to GET the service tickets for a specific customer using token authentication and validation error handling
-@customers_bp.route('/<int:id>/my-tickets', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
-@token_required
-def get_customer_service_tickets(user, customer_id):
-    try:
-        customer = Customer.query.get_or_404(customer_id)
-        
-        # Check if the customer_id in the token matches the customer_id in the URL
-        if user.id != customer_id:
-            return jsonify({"error": "Unauthorized access"}), 403
-        
-        service_tickets = customer.service_tickets  
-        return customers_schema.jsonify(service_tickets), 200
-    except ValidationError as err:
-        return jsonify(err.messages), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing customer with validation error handling
 @customers_bp.route('/<int:customer_id>', methods=['PUT'])
