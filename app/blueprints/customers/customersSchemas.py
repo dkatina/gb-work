@@ -1,9 +1,11 @@
 from app.models import Customer
 from app.extensions import ma
-from marshmallow import fields, post_load
+from marshmallow import fields, post_load, validate
 
 class CustomerSchema(ma.SQLAlchemyAutoSchema):
-    password = fields.String(load_only=True)  # Accept password in requests but don't return it
+    password = fields.String(load_only=True, 
+                             required=True,
+                             validate=validate.Length(min=8, error="Password must be at least 8 characters long."))  # Accept password in requests but don't return it
     password_hash = fields.String(dump_only=True)  # Show the hash version of the password in responses
     
     class Meta:
@@ -18,6 +20,7 @@ class CustomerSchema(ma.SQLAlchemyAutoSchema):
             customer = Customer()
             customer.set_password(password)
             data['password_hash'] = customer.password_hash
+            print("Data before load:", data) # Debugging line
         return data
     
 customer_schema = CustomerSchema()

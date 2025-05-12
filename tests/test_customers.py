@@ -3,7 +3,7 @@ from app.models import db
 import unittest
 from app.config import TestingConfig
 
-# python -m unittest discover tests
+# python -m unittest discover tests -v
 
 class TestCustomer(unittest.TestCase):
     @classmethod
@@ -24,6 +24,18 @@ class TestCustomer(unittest.TestCase):
         db.session.remove()
         db.drop_all()
         cls.app_context.pop()
+        
+    def setUp(self):
+        self.connection = db.engine.connect()
+        self.transaction = self.connection.begin()
+        db.session.bind = self.connection
+        db.session.begin_nested()
+        
+    def tearDown(self):
+        db.session.rollback()
+        self.transaction.rollback()
+        self.connection.close()
+        db.session.remove()
     
     def test_create_customer(self):
         customer_payload = {
@@ -48,7 +60,7 @@ class TestCustomer(unittest.TestCase):
         }
         
         response = self.client.post('/customers/', json=customer_payload)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 400, f"Expected 400 for invalid customer creation, got {response.status_code} with body: {response.get_json()}")
         self.assertEqual(response.json['password'], ['Missing data for required field.'])
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
