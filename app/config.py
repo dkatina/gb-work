@@ -21,9 +21,11 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
     TESTING = False
     
-class TestingConfig(BaseConfig):
+class TestingConfig:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'  # Use in-memory SQLite database for testing
     DEBUG = True
     TESTING = True
+    CACHE_TYPE = 'SimpleCache'  # Use SimpleCache for testing
     
 class ProductionConfig(BaseConfig):
     DEBUG = False
