@@ -136,5 +136,5 @@ class InventoryServiceTicket(db.Model):
     quantity = Column(Integer, nullable=False, default=1)  # Quantity of the inventory item used in the service ticket
     
     # Relationship with the Inventory class and ServiceTicket class
-    inventory = relationship('Inventory', back_populates='inventory_links', lazy=True)
+    inventory = relationship('Inventory', back_populates='inventory_links', lazy=True, overlaps='inventory_items, service_tickets')
     service_ticket = relationship('ServiceTicket', back_populates='inventory_links', lazy=True)

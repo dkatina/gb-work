@@ -2,10 +2,11 @@ from os import getenv
 import os
 from pathlib import Path
 
-class BaseConfig:
+class CommonConfig:
     SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')  # -------------- Default key is set for development, when going to production, set a strong secret key in .env file
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # Disable track modifications to save memory
-    
+
+class BaseConfig(CommonConfig):
     DB_USER = os.getenv('DB_USER')
     DB_PASSWORD = os.getenv('DB_PASSWORD')
     
@@ -21,7 +22,7 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
     TESTING = False
     
-class TestingConfig:
+class TestingConfig(CommonConfig):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'  # Use in-memory SQLite database for testing
     DEBUG = True
     TESTING = True
