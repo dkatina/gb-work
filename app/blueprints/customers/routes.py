@@ -6,6 +6,7 @@ from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
 from app.utils.util import encode_token, not_found, token_required
+from werkzeug.exceptions import NotFound
 
 # -----------------Customers Endpoints--------------------
 
@@ -91,17 +92,25 @@ def get_customers():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+
+
 # Endpoint to GET a SPECIFIC customer by ID with validation error handling
 @customers_bp.route('/<int:id>', methods=['GET'], strict_slashes=False)
-@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
+#@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_customer(id):
     try:
         customer = Customer.query.get_or_404(id)
         return CustomerSchema().jsonify(customer), 200
+    except NotFound:
+        return jsonify({"error": "Customer not found"}), 404
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
 
 # Endpoint to UPDATE an existing customer with validation error handling
 @customers_bp.route('/<int:customer_id>', methods=['PUT'])

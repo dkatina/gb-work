@@ -132,19 +132,21 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(response.json['id'], customer_id) # Verifying the correct customer ID
         
     
-    ''' 
+    
     # -------------------Invalid Get Customer by ID Test-------------------
     def test_invalid_get_customer_by_id(self):
         customer_payload = {
             1
             }
         response = self.client.get('/customers/9999/')
-        self.assertEqual(response.status_code, 404, f"Expected 404 for invalid customer ID, got {response.status_code} with body: {response.get_json()}")
-        self.assertEqual(response.json['error'], 'Customer not found')
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        self.assertEqual(response.status_code, 404, f"Expected 404 for invalid customer ID, got {response.status_code} with body: {response.get_json()}")
+        self.assertEqual(response.json['error'], 'Customer not found')
         
+    
+    '''     
     # -------------------Update Customer Test-------------------
     def test_update_customer(self):
         customer_payload = {
