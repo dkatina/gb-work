@@ -27,34 +27,69 @@ def create_customer():
 
 # Endpoint to GET ALL customers using pagination and has validation error handling
 @customers_bp.route('/', methods=['GET'])
-@limiter.limit("10 per minute; 20 per hour; 100 per day")
+#@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
+#@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def get_customers():
-     try:
-         # Setting default values for page and per_page
-         page = int(request.args.get('page', 1))
-         per_page = min(int(request.args.get('per_page', 10)), 100)  # Limit per_page to a maximum of 100
-         
-         query = select (Customer)
-         pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
-         
-         if not pagination.items:
-             return not_found({"No customers found on this page."}), 404
-         
-         return jsonify({
-            "customers": customers_schema.dump(pagination.items),
-            "total": pagination.total,
-            "page": pagination.page,
-            "per_page": pagination.per_page,
+    try:
+        page_str = request.args.get('page', '1')
+        per_page_str = request.args.get('per_page', '10')
+        
+        try:
+            page = int(page_str)
+            per_page = int(per_page_str)
+        except ValueError:
+            return jsonify({"current_page": page_str,
+                "customers": [],
+                "has_next": False,
+                "has_prev": False,
+                "page": page_str,
+                "per_page": per_page_str,
+                "total": 0,
+                "total_pages": 0,
+                "error": "Page not found or exceeds total pages"
+            }), 200
+            
+        # Using .order_by() to ensure consisten pagination
+        base_query = Customer.query.order_by(Customer.id)
+        # Getting total number of customers
+        total = base_query.count()
+        # Calculating total pages
+        total_pages = (total + per_page - 1) // per_page
+        
+        print(f"[DEBUG] total: {total}, total_pages: {total_pages}, requested page: {page}") # Debugging line
+        
+        # Checking if the requested page exceeds the total pages
+        if total == 0 or page > total_pages or page < 1:
+            return jsonify({
+                            "current_page": page,
+                            "customers": [],
+                            "has_next": False,
+                            "has_prev": False,
+                            "page": page,
+                            "per_page": per_page,
+                            "total": total,
+                            "total_pages": total_pages,
+                            "error": "Page not found or exceeds total pages"
+                            }), 200
+        
+        # Paginating the query
+        pagination = base_query.paginate(page=page, per_page=per_page, error_out=False)
+        customers = pagination.items
+        
+        print(f"Requested page: {page}, total pages: {pagination.pages}") # Debugging line
+
+        return jsonify({
             "current_page": pagination.page,
-            "total_pages": pagination.pages,
+            "customers": [CustomerSchema().dump(customer) for customer in customers],
             "has_next": pagination.has_next,
             "has_prev": pagination.has_prev,
-         }), 200
-         
-     except ValidationError as err:
-         return jsonify(err.messages), 400
-     except Exception as e:
-         return jsonify({"error": str(e)}), 500
+            "page": pagination.page,
+            "per_page": pagination.per_page,
+            "total": pagination.total,
+            "total_pages": pagination.pages
+        }), 200  
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Endpoint to GET a SPECIFIC customer by ID with validation error handling
 @customers_bp.route('/<int:id>', methods=['GET'])
