@@ -149,7 +149,6 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(response.status_code, 404, f"Expected 404 for invalid customer ID, got {response.status_code} with body: {response.get_json()}")
         self.assertEqual(response.json['error'], 'Customer not found')
         
-    
     # -------------------Update Customer Test-------------------
     def test_update_customer(self):
         # Getting the customer ID from the test customer created in setUp
@@ -180,22 +179,31 @@ class TestCustomer(unittest.TestCase):
             self.assertEqual(response.json[key], expected[key])
         
         
-    '''      
+    
     # -------------------Invalid Update Customer Test-------------------
     def test_invalid_update_customer(self):
+        # Getting the customer ID from the test customer created in setUp
+        customer = Customer.query.filter_by(email=self.test_email).first()
+        self.assertIsNotNone(customer, "Customer should exist in the database.")
+        
+        customer_id = customer.id
+        
         customer_payload = {
             "name": "John Doe",
-            "phone": "55-555-5555",
-            "email": "johndoe@email.com",
+            "phone": "12345",
+            "email": f"tc_{self.short_uuid()}@em.com",
             "password": "password123"
         }
-        response = self.client.put('/customers/1/', json=customer_payload)
-        self.assertEqual(response.status_code, 400, f"Expected 400 for invalid customer update, got {response.status_code} with body: {response.get_json()}")
-        self.assertEqual(response.json['phone'], ['Shorter than minimum length 10.'])
+        response = self.client.put(f'/customers/{customer_id}/', json=customer_payload, headers=self.auth_headers)
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        self.assertEqual(response.status_code, 400, f"Expected 400 for invalid customer update, got {response.status_code} with body: {response.get_json()}")
+        self.assertEqual(response.json['phone'], ['Shorter than minimum length 10.'])
         
+    
+    
+    '''    
     # -------------------Delete Customer Test-------------------
     def test_delete_customer(self):
         

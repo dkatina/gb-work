@@ -4,9 +4,10 @@ from marshmallow import fields, post_load, validate
 
 class CustomerSchema(ma.SQLAlchemyAutoSchema):
     password = fields.String(load_only=True, 
-                             required=True,
-                             validate=validate.Length(min=8, error="Password must be at least 8 characters long."))  # Accept password in requests but don't return it
+                        required=True,
+                        validate=validate.Length(min=8, error="Password must be at least 8 characters long."))  # Accept password in requests but don't return it
     password_hash = fields.String(dump_only=True)  # Show the hash version of the password in responses
+    phone = fields.String(required=True, validate=validate.Length(min=10, max=15, error="Phone number must be between 10 and 15 characters long."))  # Validate phone number length
     
     class Meta:
         model = Customer
