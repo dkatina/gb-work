@@ -17,6 +17,16 @@ class TestCustomer(unittest.TestCase):
         
         cls.client = cls.app.test_client()
         db.create_all()
+        
+        # Creating a test admin for all tests
+        # This admin will be used for authentication in the tests
+        admin = Admin(
+            name="Super Admin",
+            email="admin@email.com"
+            )
+        admin.set_password("adminpassword")
+        db.session.add(admin)
+        db.session.commit()
     
     @classmethod
     def tearDownClass(cls):
@@ -36,15 +46,6 @@ class TestCustomer(unittest.TestCase):
         db.session.bind = self.connection
         db.session.begin_nested()
         
-        # Creating a test admin
-        admin = Admin(
-            name="Super Admin",
-            email="admin@email.com"
-            )
-        admin.password="adminpassword"
-        db.session.add(admin)
-        db.session.commit()
-        
         # Creating a test customer
         self.test_email = f"tc_{self.short_uuid()}@em.com"
         test_customer = Customer(
@@ -59,8 +60,8 @@ class TestCustomer(unittest.TestCase):
         
         # Setting up test login credentials
         login_response = self.client.post('/auth/login', json={
-            "email": self.test_email,
-            "password": "password123"
+            "email": "admin@email.com",
+            "password": "adminpassword"
         })
         token = login_response.json.get('auth_token')
         self.auth_headers = {
@@ -207,20 +208,30 @@ class TestCustomer(unittest.TestCase):
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         self.assertEqual(response.status_code, 400, f"Expected 400 for invalid customer update, got {response.status_code} with body: {response.get_json()}")
         self.assertEqual(response.json['phone'], ['Shorter than minimum length 10.'])
-        
-    
-    
     
     # -------------------Delete Customer Test-------------------
     def test_delete_customer(self):
+        # Creating a customer to delete just for this test
+        delete_email = f"delete_{self.short_uuid()}@em.com"
+        delete_customer = Customer(
+            name="Delete Me",
+            phone="777-777-7777",
+            email=delete_email,
+            password="password123"
+        )
+        db.session.add(delete_customer)
+        db.session.commit()
+        customer_id = delete_customer.id
+        print("Customer ID to delete:", customer_id)  # Debugging line
         
-        response = self.client.delete('/customers/77/', headers=self.auth_headers)
+        # Deleting the customer
+        response = self.client.delete(f'/customers/{customer_id}', headers=self.auth_headers)
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.status_code, 404, f"Expected 404 for invalid customer ID, got {response.status_code} with body: {response.get_json()}")
-        self.assertEqual(response.json['error'], 'Customer not found')
+        self.assertEqual(response.json['message'], f"Customer {customer_id} deleted successfully")
+        
         
     
     

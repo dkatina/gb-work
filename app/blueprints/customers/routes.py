@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from app.blueprints.customers import customers_bp
 from app.blueprints.customers.customersSchemas import CustomerSchema, customers_schema
-from app.models import db, Customer
+from app.models import db, Customer, Admin
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
@@ -115,7 +115,7 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
         customer = Customer.query.get_or_404(customer_id)
         
         # Check if the customer_id in the token matches the customer_id in the URL
-        if user.id != customer_id:
+        if getattr(user, 'user_type', None) != 'admin' and user.id != customer_id:
             return jsonify({"error": "Unauthorized access"}), 403
         
         data = request.get_json()

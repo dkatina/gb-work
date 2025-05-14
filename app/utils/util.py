@@ -3,7 +3,7 @@ from jose import jwt
 import jose
 from functools import wraps
 from flask import request, jsonify, current_app
-from app.models import Customer, Mechanic
+from app.models import Admin, Customer, Mechanic
 
 def encode_token(user_id, user_type): # uses unique pieces of information to create a token specific to the user
     payload = {

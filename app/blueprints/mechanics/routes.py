@@ -1,6 +1,6 @@
 from app.blueprints.mechanics import mechanics_bp
 from app.blueprints.mechanics.mechanicsSchemas import MechanicSchema, mechanics_schema, mechanic_schema
-from app.models import ServiceTicket, db, Mechanic
+from app.models import ServiceTicket, db, Mechanic, Admin
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
