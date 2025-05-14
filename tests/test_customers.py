@@ -109,10 +109,6 @@ class TestCustomer(unittest.TestCase):
     
     # -------------------Invalid Get All Customers Test-------------------
     def test_invalid_get_all_customers(self):
-        try:
-            page = int(request.args.get('page', 1))
-        except ValueError:
-            return jsonify({"error": "Invalid page number"}), 400
         response = self.client.get('/customers/?page=9999')
         self.assertEqual(response.status_code, 404, f"Expected 404 for invalid page number, got {response.status_code} with body: {response.get_json()}")
         self.assertEqual(response.json['error'], 'Page not found')

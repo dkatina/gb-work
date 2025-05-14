@@ -60,3 +60,7 @@ def token_required(f): # Decorator to require token for certain routes
         return f(user, *args, **kwargs) # Call the original function with the user ID
     
     return decorated # Return the decorated function
+
+# Error handler for 404 Not Found
+def not_found(message="Resource not found."):
+    return jsonify({"error": message}), 404

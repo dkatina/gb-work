@@ -5,7 +5,7 @@ from app.models import db, Customer
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
-from app.utils.util import encode_token, token_required
+from app.utils.util import encode_token, not_found, token_required
 
 # -----------------Customers Endpoints--------------------
 
@@ -33,18 +33,22 @@ def get_customers():
          # Setting default values for page and per_page
          page = int(request.args.get('page', 1))
          per_page = min(int(request.args.get('per_page', 10)), 100)  # Limit per_page to a maximum of 100
+         
          query = select (Customer)
-         pagination = db.paginate(query, page=page, per_page=per_page)
+         pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
+         
+         if not pagination.items:
+             return not_found({"No customers found on this page."}), 404
          
          return jsonify({
-             "customers": customers_schema.dump(pagination.items),
-             "total": pagination.total,
-                "page": pagination.page,
-                "per_page": pagination.per_page,
-                "current_page": pagination.page,
-                "total_pages": pagination.pages,
-                "has_next": pagination.has_next,
-                "has_prev": pagination.has_prev,
+            "customers": customers_schema.dump(pagination.items),
+            "total": pagination.total,
+            "page": pagination.page,
+            "per_page": pagination.per_page,
+            "current_page": pagination.page,
+            "total_pages": pagination.pages,
+            "has_next": pagination.has_next,
+            "has_prev": pagination.has_prev,
          }), 200
          
      except ValidationError as err:
