@@ -1,7 +1,7 @@
 import uuid
 from flask import jsonify, request
 from app import create_app
-from app.models import db, Customer
+from app.models import db, Customer, Admin
 import unittest
 from app.config import TestingConfig
 
@@ -35,6 +35,15 @@ class TestCustomer(unittest.TestCase):
         self.transaction = self.connection.begin()
         db.session.bind = self.connection
         db.session.begin_nested()
+        
+        # Creating a test admin
+        admin = Admin(
+            name="Super Admin",
+            email="admin@email.com"
+            )
+        admin.password="adminpassword"
+        db.session.add(admin)
+        db.session.commit()
         
         # Creating a test customer
         self.test_email = f"tc_{self.short_uuid()}@em.com"
