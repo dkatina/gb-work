@@ -1,3 +1,4 @@
+import uuid
 from flask import jsonify, request
 from app import create_app
 from app.models import db, Customer
@@ -11,14 +12,10 @@ class TestCustomer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.app = create_app(TestingConfig)
-        cls.app.config['PROPAGATE_EXCEPTIONS'] = True
         cls.app_context = cls.app.app_context()
         cls.app_context.push()
-        cls.app.config['TESTING'] = True
-        cls.app.config['DEBUG'] = True
         
         cls.client = cls.app.test_client()
-
         db.create_all()
     
     @classmethod
@@ -32,6 +29,7 @@ class TestCustomer(unittest.TestCase):
         self.transaction = self.connection.begin()
         db.session.bind = self.connection
         db.session.begin_nested()
+        
         # Setting up test login credentials
         login_response = self.client.post('/auth/login', json={
             "email": "test@email.com",
@@ -42,15 +40,15 @@ class TestCustomer(unittest.TestCase):
             'Authorization': f'Bearer {token}'
         }
         # Creating a test customer
-        TestCustomer = {
-            "id": 77,
-            "name": "Test Customer",
-            "phone": "666-666-6666",
-            "email": "TestCustomer@email.com",
-            "password": "password123"
-        }
-        TestCustomer = Customer(**TestCustomer)
-        db.session.add(TestCustomer)
+        self.test_email = f"TestCustomer_{uuid.uuid4()}@email.com"
+        test_customer = Customer(
+            name="Test Customer",
+            phone="666-666-6666",
+            email=self.test_email,
+            password="password123"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
         
         
     def tearDown(self):
@@ -69,11 +67,12 @@ class TestCustomer(unittest.TestCase):
         }
         
         response = self.client.post('/customers/', json=customer_payload)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json['name'], 'John Doe')
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True))  # Debugging line
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json['name'], 'John Doe')
+        
     
     
     # -------------------Invalid Customer Creation Test-------------------   
@@ -85,24 +84,29 @@ class TestCustomer(unittest.TestCase):
         }
         
         response = self.client.post('/customers/', json=customer_payload)
-        self.assertEqual(response.status_code, 400, f"Expected 400 for invalid customer creation, got {response.status_code} with body: {response.get_json()}")
-        self.assertEqual(response.json['password'], ['Missing data for required field.'])
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        self.assertEqual(response.status_code, 400, f"Expected 400 for invalid customer creation, got {response.status_code} with body: {response.get_json()}")
+        self.assertEqual(response.json['password'], ['Missing data for required field.'])
+        
     
-    ''' 
+    
     # -------------------Get All Customers Test-------------------
     def test_get_all_customers(self):
         customer_payload = {
             }
         response = self.client.get('/customers/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.json['customers'], list)
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        print("Raw Response:", response.get_data(as_text=True)) # Debugging line
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json['customers'], list)
         
+
+    
+    
     # -------------------Invalid Get All Customers Test-------------------
     def test_invalid_get_all_customers(self):
         try:
@@ -116,6 +120,7 @@ class TestCustomer(unittest.TestCase):
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         
+    '''  
     # -------------------Get Customer by ID Test-------------------
     def test_get_customer_by_id(self):
         
