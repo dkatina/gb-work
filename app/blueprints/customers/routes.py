@@ -133,7 +133,7 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
 
 
 # Endpoint to DELETE a customer with validation error handling and requires token authentication
-@customers_bp.route('/<int:customer_id>', methods=['DELETE'])
+@customers_bp.route('/<int:customer_id>', methods=['DELETE'], strict_slashes=False)
 #@limiter.limit("2 per day")
 @token_required
 def delete_customer(user, customer_id): # Receiving customer_id from the token
