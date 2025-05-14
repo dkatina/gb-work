@@ -48,11 +48,16 @@ def token_required(f): # Decorator to require token for certain routes
                 user = Customer.query.get(user_id)
             elif user_type == 'mechanic':
                 user = Mechanic.query.get(user_id)
+            elif user_type == 'admin':
+                user = Admin.query.get(user_id)
             else:
                 return jsonify({'message': 'Invalid user type!'}), 401
             
             if not user:
                 return jsonify({'message': f'{user_type.capitalize()} not found!'}), 401
+            
+            # Attaching the user_type to the user object
+            user.user_type = user_type
             
         except jose.JWTError as e: # Handle JWT errors
             return jsonify({'message': 'Token is invalid!'}), 401

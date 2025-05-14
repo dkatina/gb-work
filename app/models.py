@@ -10,6 +10,20 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 # Creating the database tables
+# Admin model
+class Admin(db.Model):
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    email = Column(String(50), nullable=False, unique=True)
+    password_hash = Column(String(128), nullable=False)
+    
+    def set_password(self, password):
+        """Hash the password and store it in the database."""
+        self.password_hash = generate_password_hash(password)
+    def check_password(self, password):
+        """Check the hashed password against the provided password."""
+        return check_password_hash(self.password_hash, password)
+
 # Customer class
 # This class represents the customers table in the database
 class Customer(db.Model):
@@ -95,12 +109,12 @@ class ServiceTicket(db.Model):
     
     # Relationship with the Inventory class as many-to-many where one service ticket can have many inventory items and one inventory item can belong to many service tickets
     inventory_items = relationship('Inventory', 
-                                   secondary='inventory_service_tickets', 
-                                   back_populates='service_tickets', 
-                                   lazy=True, 
-                                   primaryjoin='InventoryServiceTicket.service_ticket_id==ServiceTicket.id', 
-                                   secondaryjoin='InventoryServiceTicket.inventory_id==Inventory.id',
-                                   overlaps='inventory_links')
+                                secondary='inventory_service_tickets', 
+                                back_populates='service_tickets', 
+                                lazy=True, 
+                                primaryjoin='InventoryServiceTicket.service_ticket_id==ServiceTicket.id', 
+                                secondaryjoin='InventoryServiceTicket.inventory_id==Inventory.id',
+                                overlaps='inventory_links')
     inventory_links = relationship('InventoryServiceTicket', back_populates='service_ticket', lazy=True)
     
 # Service_Mechanics class
@@ -121,10 +135,10 @@ class Inventory(db.Model):
     
     # Relationship with the ServiceTicket class as many-to-many where one service ticket can have many inventory items and one inventory item can belong to many service tickets
     service_tickets = relationship('ServiceTicket',
-                                   secondary='inventory_service_tickets',
-                                   back_populates='inventory_items', 
-                                   lazy=True,
-                                   overlaps='inventory_links')
+                                secondary='inventory_service_tickets',
+                                back_populates='inventory_items', 
+                                lazy=True,
+                                overlaps='inventory_links')
     inventory_links = relationship('InventoryServiceTicket', back_populates='inventory', lazy=True)
     
 # InventoryServiceTicket class junction table between Inventory and ServiceTicket

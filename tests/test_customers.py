@@ -178,8 +178,6 @@ class TestCustomer(unittest.TestCase):
         for key in expected:
             self.assertEqual(response.json[key], expected[key])
         
-        
-    
     # -------------------Invalid Update Customer Test-------------------
     def test_invalid_update_customer(self):
         # Getting the customer ID from the test customer created in setUp
@@ -203,18 +201,21 @@ class TestCustomer(unittest.TestCase):
         
     
     
-    '''    
+    
     # -------------------Delete Customer Test-------------------
     def test_delete_customer(self):
         
         response = self.client.delete('/customers/77/', headers=self.auth_headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.status_code, 404, f"Expected 404 for invalid customer ID, got {response.status_code} with body: {response.get_json()}")
-        self.assertEqual(response.json['error'], 'Customer not found')
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404, f"Expected 404 for invalid customer ID, got {response.status_code} with body: {response.get_json()}")
+        self.assertEqual(response.json['error'], 'Customer not found')
         
+    
+    
+    '''    
     # -------------------Invalid Delete Customer Test-------------------
     def test_invalid_delete_customer(self):
         # Attempting to delete a non-existent customer

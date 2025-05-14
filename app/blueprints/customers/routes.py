@@ -106,9 +106,6 @@ def get_customer(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
-
 # Endpoint to UPDATE an existing customer with validation error handling
 @customers_bp.route('/<int:customer_id>', methods=['PUT'], strict_slashes=False)
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")
@@ -137,14 +134,14 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
 
 # Endpoint to DELETE a customer with validation error handling and requires token authentication
 @customers_bp.route('/<int:customer_id>', methods=['DELETE'])
-@limiter.limit("2 per day")
+#@limiter.limit("2 per day")
 @token_required
 def delete_customer(user, customer_id): # Receiving customer_id from the token
     try:
         customer = Customer.query.get_or_404(customer_id)
         
         # Check if the customer_id in the token matches the customer_id in the URL
-        if user.id != customer_id:
+        if getattr(user, 'user_type', None) != 'admin' and user.id != customer_id:
             return jsonify({"error": "Unauthorized access"}), 403
     
         db.session.delete(customer)
