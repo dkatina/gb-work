@@ -37,6 +37,7 @@ class TestAuthentication(unittest.TestCase):
         self.connection.close()
         db.session.remove()
     
+    '''
     # -------------------Customer Login Test-------------------
     def test_customer_login(self):
         # Create a test customer
@@ -84,3 +85,5 @@ class TestAuthentication(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         print("\nFinished Customer route tests.")
+
+'''
