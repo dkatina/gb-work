@@ -23,24 +23,21 @@ class TestCustomer(unittest.TestCase):
         db.session.remove()
         db.drop_all()
         cls.app_context.pop()
-        
+    
+    @staticmethod
+    def short_uuid():
+        """Generate a short UUID for unique test data."""
+        import uuid
+        return str(uuid.uuid4())[:8]
+
     def setUp(self):
         self.connection = db.engine.connect()
         self.transaction = self.connection.begin()
         db.session.bind = self.connection
         db.session.begin_nested()
         
-        # Setting up test login credentials
-        login_response = self.client.post('/auth/login', json={
-            "email": "test@email.com",
-            "password": "password123"
-        })
-        token = login_response.json.get('auth_token')
-        self.auth_headers = {
-            'Authorization': f'Bearer {token}'
-        }
         # Creating a test customer
-        self.test_email = f"TestCustomer_{uuid.uuid4()}@email.com"
+        self.test_email = f"tc_{self.short_uuid()}@em.com"
         test_customer = Customer(
             name="Test Customer",
             phone="666-666-6666",
@@ -51,6 +48,15 @@ class TestCustomer(unittest.TestCase):
         db.session.commit()
         print("Test Customer ID:", test_customer.id)  # Debugging line
         
+        # Setting up test login credentials
+        login_response = self.client.post('/auth/login', json={
+            "email": self.test_email,
+            "password": "password123"
+        })
+        token = login_response.json.get('auth_token')
+        self.auth_headers = {
+            'Authorization': f'Bearer {token}'
+        }
         
     def tearDown(self):
         db.session.rollback()
@@ -131,8 +137,6 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['id'], customer_id) # Verifying the correct customer ID
         
-    
-    
     # -------------------Invalid Get Customer by ID Test-------------------
     def test_invalid_get_customer_by_id(self):
         customer_payload = {
@@ -146,22 +150,37 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(response.json['error'], 'Customer not found')
         
     
-    '''     
     # -------------------Update Customer Test-------------------
     def test_update_customer(self):
+        # Getting the customer ID from the test customer created in setUp
+        customer = Customer.query.filter_by(email=self.test_email).first()
+        self.assertIsNotNone(customer, "Customer should exist in the database.")
+        
+        customer_id = customer.id
+        
         customer_payload = {
             "name": "Test Update",
-            "phone": "155-555-5555",
-            "email": "testupdate@email.com",
+            "phone": "666-666-6666",
+            "email": f"tc_{self.short_uuid()}@em.com",
             "password": "password123"
         }
-        response = self.client.put('/customers/77/', json=customer_payload, headers=self.auth_headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json)
+        response = self.client.put(f'/customers/{customer_id}/', json=customer_payload, headers=self.auth_headers)
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        self.assertEqual(response.status_code, 200)
         
+        expected = {
+            "id": customer_id,
+            "name": customer_payload['name'],
+            "phone": customer_payload['phone'],
+            "email": customer_payload['email'],
+        }
+        for key in expected:
+            self.assertEqual(response.json[key], expected[key])
+        
+        
+    '''      
     # -------------------Invalid Update Customer Test-------------------
     def test_invalid_update_customer(self):
         customer_payload = {

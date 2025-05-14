@@ -92,9 +92,6 @@ def get_customers():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
-
 # Endpoint to GET a SPECIFIC customer by ID with validation error handling
 @customers_bp.route('/<int:id>', methods=['GET'], strict_slashes=False)
 #@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
@@ -113,8 +110,8 @@ def get_customer(id):
 
 
 # Endpoint to UPDATE an existing customer with validation error handling
-@customers_bp.route('/<int:customer_id>', methods=['PUT'])
-@limiter.limit("10 per minute; 20 per hour; 100 per day")
+@customers_bp.route('/<int:customer_id>', methods=['PUT'], strict_slashes=False)
+#@limiter.limit("10 per minute; 20 per hour; 100 per day")
 @token_required
 def update_customer(user, customer_id): # Receiving customer_id from the token
     try:
@@ -132,7 +129,11 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
+        print("Update Customer Exception:", e) # Debugging line
         return jsonify({"error": str(e)}), 500
+
+
+
 
 # Endpoint to DELETE a customer with validation error handling and requires token authentication
 @customers_bp.route('/<int:customer_id>', methods=['DELETE'])

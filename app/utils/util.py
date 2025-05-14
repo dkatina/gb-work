@@ -24,10 +24,10 @@ def token_required(f): # Decorator to require token for certain routes
     @wraps(f) # Preserve the original function's metadata
     def decorated(*args, **kwargs):
         token = None # Initialize token variable
-        
+        '''
         if is_testing_mode():
-            return f(*args, **kwargs)
-        
+            return f(None, *args, **kwargs)
+        '''
         if 'Authorization' in request.headers:
             token = request.headers['Authorization']
             parts = token.split()
