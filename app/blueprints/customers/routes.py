@@ -92,7 +92,7 @@ def get_customers():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to GET a SPECIFIC customer by ID with validation error handling
-@customers_bp.route('/<int:id>', methods=['GET'])
+@customers_bp.route('/<int:id>', methods=['GET'], strict_slashes=False)
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_customer(id):
     try:

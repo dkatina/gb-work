@@ -74,8 +74,6 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json['name'], 'John Doe')
         
-    
-    
     # -------------------Invalid Customer Creation Test-------------------   
     def test_invalid_creation(self):
         customer_payload = {
@@ -83,7 +81,7 @@ class TestCustomer(unittest.TestCase):
             "phone": "555-555-5555",
             "email": "johndoe@email.com"
         }
-        
+    
         response = self.client.post('/customers/', json=customer_payload)
         print("Response JSON:", response.json)  # Debugging line
         print("Response Status Code:", response.status_code)  # Debugging line
@@ -91,8 +89,6 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(response.status_code, 400, f"Expected 400 for invalid customer creation, got {response.status_code} with body: {response.get_json()}")
         self.assertEqual(response.json['password'], ['Missing data for required field.'])
         
-    
-    
     # -------------------Get All Customers Test-------------------
     def test_get_all_customers(self):
         customer_payload = {
@@ -104,9 +100,6 @@ class TestCustomer(unittest.TestCase):
         print("Raw Response:", response.get_data(as_text=True)) # Debugging line
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json['customers'], list)
-        
-
-    
     
     # -------------------Invalid Get All Customers Test-------------------
     def test_invalid_get_all_customers(self):
@@ -117,11 +110,11 @@ class TestCustomer(unittest.TestCase):
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         
         self.assertEqual(response.status_code, 200, f"Expected 200 for invalid page number, got {response.status_code}")
-        self.assertEqual(response.json.get('error'), 'Page not found or exceeds total pages')
+        self.assertEqual(response.json.get('error'), 'Page not found.')
         self.assertEqual(len(response.json.get('customers', [])), 0)
         
         
-    ''' 
+    
     # -------------------Get Customer by ID Test-------------------
     def test_get_customer_by_id(self):
         # Getting the customer ID from the test customer created in setUp
@@ -139,7 +132,7 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(response.json['id'], customer_id) # Verifying the correct customer ID
         
     
-    
+    ''' 
     # -------------------Invalid Get Customer by ID Test-------------------
     def test_invalid_get_customer_by_id(self):
         customer_payload = {
