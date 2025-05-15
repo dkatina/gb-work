@@ -4,6 +4,7 @@ from app.models import ServiceTicket, db, Mechanic, Admin
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
+from werkzeug.exceptions import NotFound
 
 # ---------------- Mechanics Endpoints --------------------
 # Endpoint to create a new mechanic with validation error handling
@@ -89,11 +90,13 @@ def get_mechanics():
     
 # Endpoint to GET a SPECIFIC mechanic by ID with validation error handling
 @mechanics_bp.route('/<int:id>', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
+#@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_mechanic(id):
     try:
         mechanic = Mechanic.query.get_or_404(id)
-        return mechanic_schema.jsonify(mechanic), 200
+        return MechanicSchema().jsonify(mechanic), 200
+    except NotFound:
+        return jsonify({"error": "Mechanic not found"}), 404
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
