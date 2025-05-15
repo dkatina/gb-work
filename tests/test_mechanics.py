@@ -6,6 +6,8 @@ import unittest
 from app.config import TestingConfig
 
 # python -m unittest discover tests -v
+# python -m unittest tests.test_mechanics -v
+
 
 
 class TestMechanic(unittest.TestCase):
@@ -52,8 +54,9 @@ class TestMechanic(unittest.TestCase):
             name="Test Mechanic",
             phone="666-666-6666",
             email=self.test_email,
-            password="password123"
+            salary=60000
         )
+        test_mechanic.set_password("password123")
         db.session.add(test_mechanic)
         db.session.commit()
         print("Test Mechanic ID:", test_mechanic.id)  # Debugging line
@@ -82,8 +85,10 @@ class TestMechanic(unittest.TestCase):
             "name": "John Doe",
             "phone": "123-456-7890",
             "email": f"john_doe_{self.short_uuid()}@example.com",
+            "salary": 50000,
             "password": "password123"
         }, headers=self.auth_headers)
+        
         
         self.assertEqual(response.status_code, 201)
         self.assertIn('id', response.json)
