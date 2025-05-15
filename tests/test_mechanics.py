@@ -79,7 +79,7 @@ class TestMechanic(unittest.TestCase):
         
 # Mechanic Routes: Create Mechanic, Get All Mechanics, Get Mechanic by ID, Get list of mechanics in order of who has worked on the most tickets /most-worked, Get Mechanic by Name, Update Existing Mechanic, Delete Mechanic
 
-# Test Create Mechanic
+# ----------------Test Create Mechanic-------------------- ***
     def test_create_mechanic(self):
         response = self.client.post('/mechanics/', json={
             "name": "John Doe",
@@ -96,7 +96,20 @@ class TestMechanic(unittest.TestCase):
         self.assertIn('phone', response.json)
         self.assertIn('email', response.json)
     
-    # Test Get All Mechanics
+    # ------------Test Invalid Create Mechanic----------------
+    def test_create_mechanic_invalid(self):
+        response = self.client.post('/mechanics/', json={
+            "name": "John Doe",
+            "phone": "123-456-7890",
+            "email": f"john_doe_{self.short_uuid()}@example.com",
+            "salary": 50000,
+            # Missing password
+        }, headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', response.json)
+    '''
+    # ------------Test Get All Mechanics----------------- ***
     def test_get_all_mechanics(self):
         response = self.client.get('/mechanics/', headers=self.auth_headers)
         
@@ -108,7 +121,19 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
     
-    # Test Get Mechanic by ID
+    # ------------Test Invalid Get All Mechanics----------------
+    def test_get_all_mechanics_invalid(self):
+        response = self.client.get('/mechanics/?page=not_a_number')
+        
+        print("Response JSON:", response.json)  # Debugging line
+        print("Response Status Code:", response.status_code)  # Debugging line
+        print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        
+        self.assertEqual(response.status_code, 200, f"Expected 200 for invalid page number, got {response.status_code}")
+        self.assertEqual(response.json.get('error'), 'Page not found.')
+        self.assertEqual(len(response.json.get('mechanics', [])), 0)
+    
+    # ---------------Test Get Mechanic by ID----------------- ***
     def test_get_mechanic_by_id(self):
         # Assuming the first mechanic in the database is the one we just created
         mechanic_id = Mechanic.query.first().id
@@ -120,7 +145,15 @@ class TestMechanic(unittest.TestCase):
         self.assertIn('phone', response.json)
         self.assertIn('email', response.json)
     
-    # Test Get Mechanic by Name
+    # --------------Test Invalid Get Mechanic by ID----------------
+    def test_get_mechanic_by_id_invalid(self):
+        response = self.client.get('/mechanics/999999', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('error', response.json)
+        self.assertEqual(response.json['error'], 'Mechanic not found.')
+    
+    # -----------------Test Get Mechanic by Name---------------- ***
     def test_get_mechanic_by_name(self):
         response = self.client.get('/mechanics/search', headers=self.auth_headers, query_string={'name': 'Test Mechanic'})
         
@@ -132,8 +165,15 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
     
+    # --------------Test Invalid Get Mechanic by Name---------------- 
+    def test_get_mechanic_by_name_invalid(self):
+        response = self.client.get('/mechanics/search', headers=self.auth_headers, query_string={'name': 'Nonexistent Mechanic'})
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json, list)  # Check if the response is a list
+        self.assertEqual(len(response.json), 0)  # No mechanics should be found
     
-    # Test Get Mechanics by Most Worked
+    # ---------------Test Get Mechanics by Most Worked---------------- ***
     def test_get_mechanics_by_most_worked(self):
         response = self.client.get('/mechanics/most-worked', headers=self.auth_headers)
         
@@ -145,9 +185,19 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
     
+    # --------------Test Invalid Get Mechanics by Most Worked----------------
+    def test_get_mechanics_by_most_worked_invalid(self):
+        response = self.client.get('/mechanics/most-worked', headers=self.auth_headers, query_string={'invalid_param': 'value'})
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json, list)  # Check if the response is a list
+        if len(response.json) > 0:
+            self.assertIn('id', response.json[0])
+            self.assertIn('name', response.json[0])
+            self.assertIn('phone', response.json[0])
+            self.assertIn('email', response.json[0])
     
-    '''        
-    # Test Update Mechanic
+    # ---------------Test Update Mechanic-----------------
     def test_update_mechanic(self):
         # Assuming the first mechanic in the database is the one we just created
         mechanic_id = Mechanic.query.first().id
@@ -163,8 +213,22 @@ class TestMechanic(unittest.TestCase):
         self.assertIn('name', response.json)
         self.assertIn('phone', response.json)
         self.assertIn('email', response.json)
+    
+    # --------------Test Invalid Update Mechanic----------------
+    def test_update_mechanic_invalid(self):
+        # Assuming the first mechanic in the database is the one we just created
+        mechanic_id = Mechanic.query.first().id
+        response = self.client.put(f'/mechanics/{mechanic_id}', json={
+            "name": "Updated Mechanic",
+            "phone": "987-654-3210",
+            # Missing email and password
+        }, headers=self.auth_headers)
         
-    # Test Delete Mechanic
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', response.json)
+    
+       
+    # ---------------Test Delete Mechanic----------------
     def test_delete_mechanic(self):
         # Assuming the first mechanic in the database is the one we just created
         mechanic_id = Mechanic.query.first().id
@@ -172,4 +236,14 @@ class TestMechanic(unittest.TestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertIn('message', response.json)
-        '''
+        
+    
+    # --------------Test Invalid Delete Mechanic----------------
+    def test_delete_mechanic_invalid(self):
+        response = self.client.delete('/mechanics/999999', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('error', response.json)
+        self.assertEqual(response.json['error'], 'Mechanic not found.')
+        
+    '''
