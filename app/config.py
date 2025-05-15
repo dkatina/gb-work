@@ -27,6 +27,7 @@ class TestingConfig(CommonConfig):
     DEBUG = True
     TESTING = True
     CACHE_TYPE = 'SimpleCache'  # Use SimpleCache for testing
+    RATELIMIT_ENABLED = False
     
 class ProductionConfig(BaseConfig):
     DEBUG = False

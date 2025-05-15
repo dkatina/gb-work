@@ -66,11 +66,15 @@ class TestMechanic(unittest.TestCase):
             "email": "admin@email.com",
             "password": "adminpassword"
         })
+        print("Login response data:", login_response.get_data(as_text=True))
+        
         token = login_response.json.get('auth_token')
         self.auth_headers = {
             'Authorization': f'Bearer {token}'
         }
         
+        print("Login response status:", login_response.status_code)
+
     def tearDown(self):
         db.session.rollback()
         self.transaction.rollback()
@@ -185,7 +189,7 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
     
-    # --------------Test Invalid Get Mechanics by Most Worked----------------
+    # --------------Test Invalid Get Mechanics by Most Worked---------------- ***
     def test_get_mechanics_by_most_worked_invalid(self):
         response = self.client.get('/mechanics/most-worked', headers=self.auth_headers, query_string={'invalid_param': 'value'})
         
@@ -196,24 +200,38 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('name', response.json[0])
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
-    '''
+    
     # ---------------Test Update Mechanic-----------------
     def test_update_mechanic(self):
-        # Assuming the first mechanic in the database is the one we just created
-        mechanic_id = Mechanic.query.first().id
-        response = self.client.put(f'/mechanics/{mechanic_id}', json={
-            "name": "Updated Mechanic",
-            "phone": "987-654-3210",
-            "email": f"updated_{self.short_uuid()}@example.com",
-            "password": "newpassword123"
-        }, headers=self.auth_headers)
+        # Getting the mechanic ID from the test mechanic created in setUp
+        mechanic = Mechanic.query.filter_by(email=self.test_email).first()
+        self.assertIsNotNone(mechanic, "Mechanic should exist in the database.")
         
+        mechanic_id = mechanic.id
+        
+        mechanic_payload = {
+            "name": "Update Mechanic",
+            "phone": "444-666-6666",
+            "email": f"tc_{self.short_uuid()}@em.com",
+            "salary": 60000,
+            "password": "password123"
+        }
+        response = self.client.put(f'/mechanics/{mechanic_id}/', json=mechanic_payload, headers=self.auth_headers)
+        print("Response JSON:", response.json)  # Debugging line
+        print("Response Status Code:", response.status_code)  # Debugging line
+        print("Response Data:", response.get_data(as_text=True)) # Debugging line
         self.assertEqual(response.status_code, 200)
-        self.assertIn('id', response.json)
-        self.assertIn('name', response.json)
-        self.assertIn('phone', response.json)
-        self.assertIn('email', response.json)
-    
+        
+        expected = {
+            "id": mechanic_id,
+            "name": mechanic_payload['name'],
+            "phone": mechanic_payload['phone'],
+            "email": mechanic_payload['email'],
+            "salary": mechanic_payload['salary'],
+        }
+        for key in expected:
+            self.assertEqual(response.json[key], expected[key])
+    '''
     # --------------Test Invalid Update Mechanic----------------
     def test_update_mechanic_invalid(self):
         # Assuming the first mechanic in the database is the one we just created
@@ -227,7 +245,7 @@ class TestMechanic(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('error', response.json)
     
-       
+    
     # ---------------Test Delete Mechanic----------------
     def test_delete_mechanic(self):
         # Assuming the first mechanic in the database is the one we just created

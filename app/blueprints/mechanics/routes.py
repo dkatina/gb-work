@@ -5,6 +5,7 @@ from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
 from werkzeug.exceptions import NotFound
+from app.utils.util import encode_token, not_found, token_required
 
 # ---------------- Mechanics Endpoints --------------------
 # Endpoint to create a new mechanic with validation error handling
@@ -131,11 +132,17 @@ def search_mechanics():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing mechanic with validation error handling
-@mechanics_bp.route('/<int:id>', methods=['PUT'])
-@limiter.limit("10 per minute; 20 per hour; 100 per day")
-def update_mechanic(id):
+@mechanics_bp.route('/<int:mechanic_id>', methods=['PUT'], strict_slashes=False)
+#@limiter.limit("10 per minute; 20 per hour; 100 per day")
+@token_required
+def update_mechanic(user, mechanic_id):
     try:
-        mechanic = Mechanic.query.get_or_404(id)
+        mechanic = Mechanic.query.get_or_404(mechanic_id)
+        
+        # Check if the mechanic_id in the token matches the mechanic_id in the URL
+        if getattr(user, 'user_type', None) != 'admin' and user.id != mechanic_id:
+            return jsonify({"error": "Unauthorized access"}), 403
+        
         data = request.get_json()
         mechanic_schema = MechanicSchema()
         mechanic = mechanic_schema.load(data, instance=mechanic, session=db.session)
@@ -144,10 +151,11 @@ def update_mechanic(id):
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
+        print("Update Mechanic Exception:", e) # Debugging line
         return jsonify({"error": str(e)}), 500
-
+    
 # Endpoint to DELETE a mechanic by id with validation error handling
-@mechanics_bp.route('/<int:id>', methods=['DELETE'])
+@mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
 @limiter.limit("2 per day")
 def delete_mechanic(id):
     try:
