@@ -145,14 +145,14 @@ class TestMechanic(unittest.TestCase):
         self.assertIn('phone', response.json)
         self.assertIn('email', response.json)
     
-    # --------------Test Invalid Get Mechanic by ID----------------
+    # --------------Test Invalid Get Mechanic by ID---------------- ***
     def test_get_mechanic_by_id_invalid(self):
         response = self.client.get('/mechanics/999999', headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 404)
         self.assertIn('error', response.json)
         self.assertEqual(response.json['error'], 'Mechanic not found.')
-    '''
+    
     # -----------------Test Get Mechanic by Name---------------- ***
     def test_get_mechanic_by_name(self):
         response = self.client.get('/mechanics/search', headers=self.auth_headers, query_string={'name': 'Test Mechanic'})
@@ -172,7 +172,7 @@ class TestMechanic(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json, list)  # Check if the response is a list
         self.assertEqual(len(response.json), 0)  # No mechanics should be found
-    
+    '''
     # ---------------Test Get Mechanics by Most Worked---------------- ***
     def test_get_mechanics_by_most_worked(self):
         response = self.client.get('/mechanics/most-worked', headers=self.auth_headers)
