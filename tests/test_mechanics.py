@@ -273,13 +273,18 @@ class TestMechanic(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['message'], f"Mechanic {mechanic_id} deleted successfully")
         
-    '''
+    
     # --------------Test Invalid Delete Mechanic----------------
     def test_delete_mechanic_invalid(self):
-        response = self.client.delete('/mechanics/999999', headers=self.auth_headers)
+        # Attempting to delete a non-existent mechanic
+        response = self.client.delete('/mechanics/9999/', headers=self.auth_headers)
+        mechanic_payload = {
+            9999
+            }
         
-        self.assertEqual(response.status_code, 404)
-        self.assertIn('error', response.json)
-        self.assertEqual(response.json['error'], 'Mechanic not found.')
+        print("Response JSON:", response.json)  # Debugging line
+        print("Response Status Code:", response.status_code)  # Debugging line
+        print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        self.assertEqual(response.status_code, 404, f"Expected 404 for invalid mechanic ID, got {response.status_code} with body: {response.get_json()}")
+        self.assertEqual(response.json['error'], 'Mechanic not found')
         
-    '''
