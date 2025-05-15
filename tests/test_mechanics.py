@@ -96,7 +96,6 @@ class TestMechanic(unittest.TestCase):
         self.assertIn('phone', response.json)
         self.assertIn('email', response.json)
     
-    '''
     # Test Get All Mechanics
     def test_get_all_mechanics(self):
         response = self.client.get('/mechanics/', headers=self.auth_headers)
@@ -109,6 +108,8 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
     
+    
+    '''
     # Test Get Mechanic by ID
     def test_get_mechanic_by_id(self):
         # Assuming the first mechanic in the database is the one we just created
