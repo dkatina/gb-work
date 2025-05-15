@@ -231,11 +231,14 @@ class TestMechanic(unittest.TestCase):
         }
         for key in expected:
             self.assertEqual(response.json[key], expected[key])
-    '''
+    
     # --------------Test Invalid Update Mechanic----------------
     def test_update_mechanic_invalid(self):
-        # Assuming the first mechanic in the database is the one we just created
-        mechanic_id = Mechanic.query.first().id
+        # Getting the mechanic ID from the test mechanic created in setUp
+        mechanic = Mechanic.query.filter_by(email=self.test_email).first()
+        self.assertIsNotNone(mechanic, "Mechanic should exist in the database.")
+        
+        mechanic_id = mechanic.id
         response = self.client.put(f'/mechanics/{mechanic_id}', json={
             "name": "Updated Mechanic",
             "phone": "987-654-3210",
@@ -245,7 +248,7 @@ class TestMechanic(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('error', response.json)
     
-    
+    '''
     # ---------------Test Delete Mechanic----------------
     def test_delete_mechanic(self):
         # Assuming the first mechanic in the database is the one we just created
