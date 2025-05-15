@@ -165,14 +165,14 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
     
-    # --------------Test Invalid Get Mechanic by Name---------------- 
+    # --------------Test Invalid Get Mechanic by Name---------------- ***
     def test_get_mechanic_by_name_invalid(self):
         response = self.client.get('/mechanics/search', headers=self.auth_headers, query_string={'name': 'Nonexistent Mechanic'})
         
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json, list)  # Check if the response is a list
         self.assertEqual(len(response.json), 0)  # No mechanics should be found
-    '''
+    
     # ---------------Test Get Mechanics by Most Worked---------------- ***
     def test_get_mechanics_by_most_worked(self):
         response = self.client.get('/mechanics/most-worked', headers=self.auth_headers)
@@ -196,7 +196,7 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('name', response.json[0])
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
-    
+    '''
     # ---------------Test Update Mechanic-----------------
     def test_update_mechanic(self):
         # Assuming the first mechanic in the database is the one we just created
