@@ -248,17 +248,32 @@ class TestMechanic(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('error', response.json)
     
-    '''
-    # ---------------Test Delete Mechanic----------------
-    def test_delete_mechanic(self):
-        # Assuming the first mechanic in the database is the one we just created
-        mechanic_id = Mechanic.query.first().id
-        response = self.client.delete(f'/mechanics/{mechanic_id}', headers=self.auth_headers)
-        
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('message', response.json)
-        
     
+    # ---------------Test Delete Mechanic---------------- ***
+    def test_delete_mechanic(self):
+        # Creating a mechanic to delete just for this test
+        delete_em = f"delete_{self.short_uuid()}@em.com"
+        delete_mechanic = Mechanic(
+            name="Delete Mech",
+            phone="777-444-7777",
+            email=delete_em,
+            salary=60000,
+            password="password123"
+        )
+        db.session.add(delete_mechanic)
+        db.session.commit()
+        mechanic_id = delete_mechanic.id
+        print("Mechanic ID to delete:", mechanic_id)  # Debugging line
+        
+        # Deleting the mechanic
+        response = self.client.delete(f'/mechanics/{mechanic_id}', headers=self.auth_headers)
+        print("Response JSON:", response.json)  # Debugging line
+        print("Response Status Code:", response.status_code)  # Debugging line
+        print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['message'], f"Mechanic {mechanic_id} deleted successfully")
+        
+    '''
     # --------------Test Invalid Delete Mechanic----------------
     def test_delete_mechanic_invalid(self):
         response = self.client.delete('/mechanics/999999', headers=self.auth_headers)

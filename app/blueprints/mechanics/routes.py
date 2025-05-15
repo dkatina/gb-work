@@ -156,10 +156,11 @@ def update_mechanic(user, mechanic_id):
     
 # Endpoint to DELETE a mechanic by id with validation error handling
 @mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
-@limiter.limit("2 per day")
-def delete_mechanic(id):
+#@limiter.limit("2 per day")
+@token_required
+def delete_mechanic(user, mechanic_id):
     try:
-        mechanic = Mechanic.query.get_or_404(id)
+        mechanic = Mechanic.query.get_or_404(mechanic_id)
         db.session.delete(mechanic)
         db.session.commit()
         return jsonify({"message": "Mechanic deleted successfully"}), 200
