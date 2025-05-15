@@ -121,7 +121,6 @@ class TestMechanic(unittest.TestCase):
         self.assertIn('email', response.json)
     
     
-    '''
     # Test Get Mechanic by Name
     def test_get_mechanic_by_name(self):
         response = self.client.get('/mechanics/search', headers=self.auth_headers, query_string={'name': 'Test Mechanic'})
@@ -133,7 +132,9 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('name', response.json[0])
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
-            
+    
+    
+    '''        
     # Test Get Mechanics by Most Worked
     def test_get_mechanics_by_most_worked(self):
         response = self.client.get('/mechanics/most-worked', headers=self.auth_headers)
