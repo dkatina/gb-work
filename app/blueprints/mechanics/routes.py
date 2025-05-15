@@ -24,14 +24,69 @@ def create_mechanic():
 
 # Endpoint to GET ALL mechanics with validation error handling
 @mechanics_bp.route('/', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
+#@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_mechanics():
     try:
-        mechanics = Mechanic.query.all()
-        return mechanics_schema.jsonify(mechanics), 200
+        page_str = request.args.get('page', '1')
+        per_page_str = request.args.get('per_page', '10')
+        
+        try:
+            page = int(page_str)
+            per_page = int(per_page_str)
+        except ValueError:
+            return jsonify({"current_page": page_str,
+                "mechanics": [],
+                "has_next": False,
+                "has_prev": False,
+                "page": page_str,
+                "per_page": per_page_str,
+                "total": 0,
+                "total_pages": 0,
+                "error": "Page not found or exceeds total pages"
+            }), 200
+            
+        # Using .order_by() to ensure consisten pagination
+        base_query = Mechanic.query.order_by(Mechanic.id)
+        # Getting total number of mechanics
+        total = base_query.count()
+        # Calculating total pages
+        total_pages = (total + per_page - 1) // per_page
+        
+        print(f"[DEBUG] total: {total}, total_pages: {total_pages}, requested page: {page}") # Debugging line
+        
+        # Checking if the requested page exceeds the total pages
+        if total == 0 or page > total_pages or page < 1:
+            return jsonify({
+                            "current_page": page,
+                            "mechanics": [],
+                            "has_next": False,
+                            "has_prev": False,
+                            "page": page,
+                            "per_page": per_page,
+                            "total": total,
+                            "total_pages": total_pages,
+                            "error": "Page not found or exceeds total pages"
+                            }), 200
+        
+        # Paginating the query
+        pagination = base_query.paginate(page=page, per_page=per_page, error_out=False)
+        mechanics = pagination.items
+        
+        print(f"Requested page: {page}, total pages: {pagination.pages}") # Debugging line
+
+        return jsonify({
+            "current_page": pagination.page,
+            "mechanics": [MechanicSchema().dump(mechanic) for mechanic in mechanics],
+            "has_next": pagination.has_next,
+            "has_prev": pagination.has_prev,
+            "page": pagination.page,
+            "per_page": pagination.per_page,
+            "total": pagination.total,
+            "total_pages": pagination.pages
+        }), 200  
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
 # Endpoint to GET a SPECIFIC mechanic by ID with validation error handling
 @mechanics_bp.route('/<int:id>', methods=['GET'])
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls

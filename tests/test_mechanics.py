@@ -96,7 +96,7 @@ class TestMechanic(unittest.TestCase):
         self.assertIn('phone', response.json)
         self.assertIn('email', response.json)
     
-    # ------------Test Invalid Create Mechanic----------------
+    # ------------Test Invalid Create Mechanic---------------- ***
     def test_create_mechanic_invalid(self):
         response = self.client.post('/mechanics/', json={
             "name": "John Doe",
@@ -108,7 +108,7 @@ class TestMechanic(unittest.TestCase):
         
         self.assertEqual(response.status_code, 400)
         self.assertIn('error', response.json)
-    '''
+    
     # ------------Test Get All Mechanics----------------- ***
     def test_get_all_mechanics(self):
         response = self.client.get('/mechanics/', headers=self.auth_headers)
@@ -121,7 +121,7 @@ class TestMechanic(unittest.TestCase):
             self.assertIn('phone', response.json[0])
             self.assertIn('email', response.json[0])
     
-    # ------------Test Invalid Get All Mechanics----------------
+    # ------------Test Invalid Get All Mechanics---------------- ***
     def test_get_all_mechanics_invalid(self):
         response = self.client.get('/mechanics/?page=not_a_number')
         
@@ -152,7 +152,7 @@ class TestMechanic(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertIn('error', response.json)
         self.assertEqual(response.json['error'], 'Mechanic not found.')
-    
+    '''
     # -----------------Test Get Mechanic by Name---------------- ***
     def test_get_mechanic_by_name(self):
         response = self.client.get('/mechanics/search', headers=self.auth_headers, query_string={'name': 'Test Mechanic'})
