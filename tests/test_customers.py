@@ -6,7 +6,6 @@ import unittest
 from app.config import TestingConfig
 
 # python -m unittest discover tests -v
-# Customer Routes: Create Customer, Get All Customers, Get Customer by ID, Update Existing Customer, Delete Customer
 
 class TestCustomer(unittest.TestCase):
     @classmethod
@@ -74,6 +73,7 @@ class TestCustomer(unittest.TestCase):
         self.connection.close()
         db.session.remove()
     
+    # Customer Routes: Create Customer, Get All Customers, Get Customer by ID, Update Existing Customer, Delete Customer
     # -------------------Create Customer Test-------------------
     def test_create_customer(self):
         customer_payload = {
