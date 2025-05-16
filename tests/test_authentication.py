@@ -53,7 +53,7 @@ class TestAuthentication(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertIn('auth_token', response.json)
-    '''    
+        
     # -------------------Mechanic Login Test-------------------    
     def test_mechanic_login(self):
         # Create a test mechanic
@@ -73,7 +73,7 @@ class TestAuthentication(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertIn('auth_token', response.json)
-    
+    '''
     # -------------------Invalid Login Test-------------------   
     def test_invalid_login(self):
         # Attempt to log in with invalid credentials should return 401
