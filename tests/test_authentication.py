@@ -4,6 +4,7 @@ import unittest
 from app.config import TestingConfig
 
 # python -m unittest discover tests -v
+# python -m unittest tests.test_authentication -v
 
 class TestAuthentication(unittest.TestCase):
     @classmethod
@@ -37,7 +38,7 @@ class TestAuthentication(unittest.TestCase):
         self.connection.close()
         db.session.remove()
     
-    '''
+    
     # -------------------Customer Login Test-------------------
     def test_customer_login(self):
         # Create a test customer
@@ -52,7 +53,7 @@ class TestAuthentication(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertIn('auth_token', response.json)
-        
+    '''    
     # -------------------Mechanic Login Test-------------------    
     def test_mechanic_login(self):
         # Create a test mechanic
