@@ -9,7 +9,7 @@ from app.config import TestingConfig
 # python -m unittest tests.test_service_tickets -v
 
 
-class TestMechanic(unittest.TestCase):
+class TestServiceTicket(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.app = create_app(TestingConfig)
@@ -51,7 +51,7 @@ class TestMechanic(unittest.TestCase):
         self.test_email = f"tc_{self.short_uuid()}@em.com"
         test_customer = Customer(
             name="Test Customer",
-            phone="666-666-6666",
+            phone="666-666-6636",
             email=self.test_email,
             password="password123"
         )
@@ -63,9 +63,10 @@ class TestMechanic(unittest.TestCase):
         self.test_email = f"tc_{self.short_uuid()}@em.com"
         test_mechanic = Mechanic(
             name="Test Mechanic",
-            phone="666-666-6666",
+            phone="696-666-6666",
             email=self.test_email,
-            salary=60000
+            salary=60000,
+            password="password123"
         )
         test_mechanic.set_password("password123")
         db.session.add(test_mechanic)
@@ -103,21 +104,23 @@ class TestMechanic(unittest.TestCase):
         test_customer = Customer(
             name="Test Customer",
             phone="123-456-7890",
-            email=f"testcustomer_{self.short_uuid()}@em.com"
+            email=f"testcustomer_{self.short_uuid()}@em.com",
+            password="password123"
         )
         db.session.add(test_customer)
         db.session.commit()
         
         # Create a service ticket
-        response = self.client.post('/service_tickets', json={
+        response = self.client.post('/service_tickets/', json={
             "customer_id": test_customer.id,
-            "mechanic_id": Mechanic.query.first().id,
-            "description": "Test Service Ticket",
-            "status": "Open"
+            "vin": "1HGCM82633A123456",
+            "service_desc": "Test Service Ticket"
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 201)
-        self.assertIn('Service ticket created successfully', response.get_data(as_text=True))
+        data = response.get_json()
+        self.assertEqual(data['service_desc'], "Test Service Ticket")
+        self.assertEqual(data['vin'], "1HGCM82633A123456")
     
     '''    
     # ---------------------- Test Invalid Create Service Ticket ----------------------

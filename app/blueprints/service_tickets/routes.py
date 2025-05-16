@@ -10,7 +10,7 @@ from app.utils.util import encode_token, token_required
 
 # ---------------------- Service Tickets Endpoints ---------------------
 # Endpoint to CREATE a new service ticket with validation error handling
-@service_tickets_bp.route('/', methods=['POST'])
+@service_tickets_bp.route('/', methods=['POST'], strict_slashes=False)
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def create_service_ticket():
     try:
