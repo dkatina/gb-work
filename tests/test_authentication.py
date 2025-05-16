@@ -73,7 +73,7 @@ class TestAuthentication(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertIn('auth_token', response.json)
-    '''
+    
     # -------------------Invalid Login Test-------------------   
     def test_invalid_login(self):
         # Attempt to log in with invalid credentials should return 401
@@ -87,4 +87,3 @@ class TestAuthentication(unittest.TestCase):
     def tearDownClass(cls):
         print("\nFinished Customer route tests.")
 
-'''
