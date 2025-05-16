@@ -122,19 +122,19 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(data['service_desc'], "Test Service Ticket")
         self.assertEqual(data['vin'], "1HGCM82633A123456")
     
-    '''    
+        
     # ---------------------- Test Invalid Create Service Ticket ----------------------
     def test_invalid_create_service_ticket(self):
         # Attempt to create a service ticket without a customer ID
         response = self.client.post('/service_tickets', json={
-            "mechanic_id": Mechanic.query.first().id,
-            "description": "Test Service Ticket",
-            "status": "Open"
+            "vin": "2GHCM82633A123456",
+            "service_desc": "Invalid Test Service Ticket"
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 400)
         self.assertIn('Customer ID is required', response.get_data(as_text=True))
-        
+    
+    '''    
     # ---------------------- Test Get All Service Tickets ----------------------
     def test_get_all_service_tickets(self):
         # Create a service ticket
