@@ -1,0 +1,384 @@
+import uuid
+from flask import jsonify, request
+from app import create_app
+from app.models import db, Mechanic, Admin, ServiceTicket, Customer
+import unittest
+from app.config import TestingConfig
+
+# python -m unittest discover tests -v
+# python -m unittest tests.test_service_tickets -v
+
+
+class TestMechanic(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = create_app(TestingConfig)
+        cls.app_context = cls.app.app_context()
+        cls.app_context.push()
+        
+        cls.client = cls.app.test_client()
+        db.create_all()
+        
+        # Creating a test admin for all tests
+        # This admin will be used for authentication in the tests
+        admin = Admin(
+            name="Super Admin",
+            email="admin@email.com"
+            )
+        admin.set_password("adminpassword")
+        db.session.add(admin)
+        db.session.commit()
+    
+    @classmethod
+    def tearDownClass(cls):
+        db.session.remove()
+        db.drop_all()
+        cls.app_context.pop()
+    
+    @staticmethod
+    def short_uuid():
+        #Generate a short UUID for unique test data.
+        import uuid
+        return str(uuid.uuid4())[:8]
+
+    def setUp(self):
+        self.connection = db.engine.connect()
+        self.transaction = self.connection.begin()
+        db.session.bind = self.connection
+        db.session.begin_nested()
+        
+        # Creating a test customer
+        self.test_email = f"tc_{self.short_uuid()}@em.com"
+        test_customer = Customer(
+            name="Test Customer",
+            phone="666-666-6666",
+            email=self.test_email,
+            password="password123"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        print("Test Customer ID:", test_customer.id)  # Debugging line
+        
+        # Creating a test mechanic
+        self.test_email = f"tc_{self.short_uuid()}@em.com"
+        test_mechanic = Mechanic(
+            name="Test Mechanic",
+            phone="666-666-6666",
+            email=self.test_email,
+            salary=60000
+        )
+        test_mechanic.set_password("password123")
+        db.session.add(test_mechanic)
+        db.session.commit()
+        print("Test Mechanic ID:", test_mechanic.id)  # Debugging line
+        
+        # Setting up test login credentials
+        login_response = self.client.post('/auth/login', json={
+            "email": "admin@email.com",
+            "password": "adminpassword"
+        })
+        print("Login response data:", login_response.get_data(as_text=True))
+        
+        token = login_response.json.get('auth_token')
+        self.auth_headers = {
+            'Authorization': f'Bearer {token}'
+        }
+        
+        print("Login response status:", login_response.status_code)
+
+    def tearDown(self):
+        db.session.rollback()
+        self.transaction.rollback()
+        self.connection.close()
+        db.session.remove()
+        
+    # Service Ticket Routes: Create Service Ticket, Invalid Create Service Ticket, Get All Service Tickets, Invalid Get All Service Tickets, 
+    # Get All Service Tickets for Specific Customer or Mechanic, Invalid Get All Service Tickets for Specific Customer or Mechanic, Get Service Ticket by ID, 
+    # Invalid Get Service Ticket by ID, Update Existing Service Ticket, Invalid Update Existing Service Ticket, Add a Part to a Service Ticket using PUT, 
+    # Invalid Adding Part to Service Ticket using PUT, Delete Service Ticket, Invalid Delete Service Ticket
+
+    # ---------------------- Test Create Service Ticket ----------------------
+    def test_create_service_ticket(self):
+        # Create a test customer
+        test_customer = Customer(
+            name="Test Customer",
+            phone="123-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        
+        # Create a service ticket
+        response = self.client.post('/service_tickets', json={
+            "customer_id": test_customer.id,
+            "mechanic_id": Mechanic.query.first().id,
+            "description": "Test Service Ticket",
+            "status": "Open"
+        }, headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('Service ticket created successfully', response.get_data(as_text=True))
+    
+    '''    
+    # ---------------------- Test Invalid Create Service Ticket ----------------------
+    def test_invalid_create_service_ticket(self):
+        # Attempt to create a service ticket without a customer ID
+        response = self.client.post('/service_tickets', json={
+            "mechanic_id": Mechanic.query.first().id,
+            "description": "Test Service Ticket",
+            "status": "Open"
+        }, headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Customer ID is required', response.get_data(as_text=True))
+        
+    # ---------------------- Test Get All Service Tickets ----------------------
+    def test_get_all_service_tickets(self):
+        # Create a service ticket
+        test_customer = Customer(
+            name="Test Customer",
+            phone="123-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        
+        response = self.client.post('/service_tickets', json={
+            "customer_id": test_customer.id,
+            "mechanic_id": Mechanic.query.first().id,
+            "description": "Test Service Ticket",
+            "status": "Open"
+        }, headers=self.auth_headers)
+        
+        # Get all service tickets
+        response = self.client.get('/service_tickets', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Service tickets retrieved successfully', response.get_data(as_text=True))
+        
+    # ---------------------- Test Invalid Get All Service Tickets ----------------------
+    def test_invalid_get_all_service_tickets(self):
+        # Attempt to get all service tickets without authentication
+        response = self.client.get('/service_tickets')
+        
+        self.assertEqual(response.status_code, 401)
+        self.assertIn('Missing authorization header', response.get_data(as_text=True))
+        
+    # ---------------------- Test Get All Service Tickets for Specific Customer ----------------------
+    def test_get_all_service_tickets_for_customer(self):
+        # Create a test customer
+        test_customer = Customer(
+            name="Test Customer",
+            phone="123-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        
+        # Create a service ticket for the test customer
+        response = self.client.post('/service_tickets', json={
+            "customer_id": test_customer.id,
+            "mechanic_id": Mechanic.query.first().id,
+            "description": "Test Service Ticket",
+            "status": "Open"
+        }, headers=self.auth_headers)
+        
+        # Get all service tickets for the test customer
+        response = self.client.get(f'/service_tickets/customer/{test_customer.id}', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Service tickets retrieved successfully', response.get_data(as_text=True))
+    
+    # ---------------------- Test Get All Service Tickets for Specific Mechanic ----------------------   
+    def test_get_all_service_tickets_for_mechanic(self):
+        # Create a test customer
+        test_customer = Customer(
+            name="Test Customer",
+            phone="123-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        
+        # Create a service ticket for the test customer
+        response = self.client.post('/service_tickets', json={
+            "customer_id": test_customer.id,
+            "mechanic_id": Mechanic.query.first().id,
+            "description": "Test Service Ticket",
+            "status": "Open"
+        }, headers=self.auth_headers)
+        
+        # Get all service tickets for the test mechanic
+        response = self.client.get(f'/service_tickets/mechanic/{Mechanic.query.first().id}', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Service tickets retrieved successfully', response.get_data(as_text=True))
+        
+    # ---------------------- Test Invalid Get All Service Tickets for Specific Customer ----------------------
+    def test_invalid_get_all_service_tickets_for_customer(self):
+        # Attempt to get all service tickets for a non-existent customer
+        response = self.client.get('/service_tickets/customer/99999999', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('Customer not found', response.get_data(as_text=True))
+        
+    # ---------------------- Test Invalid Get All Service Tickets for Specific Mechanic ----------------------
+    def test_invalid_get_all_service_tickets_for_mechanic(self):
+        # Attempt to get all service tickets for a non-existent mechanic
+        response = self.client.get('/service_tickets/mechanic/99999999', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('Mechanic not found', response.get_data(as_text=True))
+        
+    # ---------------------- Test Get Service Ticket by ID ----------------------
+    def test_get_service_ticket_by_id(self):
+        # Create a test customer
+        test_customer = Customer(
+            name="Test Customer",
+            phone="123-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        
+        # Create a service ticket for the test customer
+        response = self.client.post('/service_tickets', json={
+            "customer_id": test_customer.id,
+            "mechanic_id": Mechanic.query.first().id,
+            "description": "Test Service Ticket",
+            "status": "Open"
+        }, headers=self.auth_headers)
+        
+        service_ticket_id = response.json.get('service_ticket_id')
+        
+        # Get the service ticket by ID
+        response = self.client.get(f'/service_tickets/{service_ticket_id}', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Service ticket retrieved successfully', response.get_data(as_text=True))
+        
+    # ---------------------- Test Invalid Get Service Ticket by ID ----------------------
+    def test_invalid_get_service_ticket_by_id(self):
+        # Attempt to get a service ticket by a non-existent ID
+        response = self.client.get('/service_tickets/99999999', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('Service ticket not found', response.get_data(as_text=True))
+        
+    # ---------------------- Test Update Existing Service Ticket ----------------------
+    def test_update_service_ticket(self):
+        # Create a test customer
+        test_customer = Customer(
+            name="Test Customer",
+            phone="123-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        
+        # Create a service ticket for the test customer
+        response = self.client.post('/service_tickets', json={
+            "customer_id": test_customer.id,
+            "mechanic_id": Mechanic.query.first().id,
+            "description": "Test Service Ticket",
+            "status": "Open"
+        }, headers=self.auth_headers)
+        
+        service_ticket_id = response.json.get('service_ticket_id')
+        
+        # Update the service ticket
+        response = self.client.put(f'/service_tickets/{service_ticket_id}', json={
+            "description": "Updated Service Ticket",
+            "status": "In Progress"
+        }, headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Service ticket updated successfully', response.get_data(as_text=True))
+        
+    # ---------------------- Test Invalid Update Existing Service Ticket ----------------------
+    def test_invalid_update_service_ticket(self):
+        # Attempt to update a service ticket with a non-existent ID
+        response = self.client.put('/service_tickets/99999999', json={
+            "description": "Updated Service Ticket",
+            "status": "In Progress"
+        }, headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('Service ticket not found', response.get_data(as_text=True))
+        
+    # ---------------------- Test Add a Part to a Service Ticket using PUT ----------------------
+    def test_add_part_to_service_ticket(self):
+        # Create a test customer
+        test_customer = Customer(
+            name="Test Customer",
+            phone="123-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        
+        # Create a service ticket for the test customer
+        response = self.client.post('/service_tickets', json={
+            "customer_id": test_customer.id,
+            "mechanic_id": Mechanic.query.first().id,
+            "description": "Test Service Ticket",
+            "status": "Open"
+        }, headers=self.auth_headers)
+        
+        service_ticket_id = response.json.get('service_ticket_id')
+        
+        # Add a part to the service ticket
+        response = self.client.put(f'/service_tickets/{service_ticket_id}/add_part', json={
+            "part_name": "Test Part",
+            "part_price": 100.00
+        }, headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Part added to service ticket successfully', response.get_data(as_text=True))
+        
+    # ---------------------- Test Invalid Adding Part to Service Ticket using PUT ----------------------
+    def test_invalid_add_part_to_service_ticket(self):
+        # Attempt to add a part to a service ticket with a non-existent ID
+        response = self.client.put('/service_tickets/99999999/add_part', json={
+            "part_name": "Test Part",
+            "part_price": 100.00
+        }, headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('Service ticket not found', response.get_data(as_text=True))
+        
+    # ---------------------- Test Delete Service Ticket ----------------------
+    def test_delete_service_ticket(self):
+        # Create a test customer
+        test_customer = Customer(
+            name="Test Customer",
+            phone="123-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        
+        # Create a service ticket for the test customer
+        response = self.client.post('/service_tickets', json={
+            "customer_id": test_customer.id,
+            "mechanic_id": Mechanic.query.first().id,
+            "description": "Test Service Ticket",
+            "status": "Open"
+        }, headers=self.auth_headers)
+        
+        service_ticket_id = response.json.get('service_ticket_id')
+        
+        # Delete the service ticket
+        response = self.client.delete(f'/service_tickets/{service_ticket_id}', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Service ticket deleted successfully', response.get_data(as_text=True))
+        
+    # ---------------------- Test Invalid Delete Service Ticket ----------------------
+    def test_invalid_delete_service_ticket(self):
+        # Attempt to delete a service ticket with a non-existent ID
+        response = self.client.delete('/service_tickets/99999999', headers=self.auth_headers)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('Service ticket not found', response.get_data(as_text=True))
+    '''
