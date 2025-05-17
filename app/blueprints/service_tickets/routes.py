@@ -18,7 +18,13 @@ def create_service_ticket():
         service_ticket = service_ticket_schema.load(data, session=db.session)
         db.session.add(service_ticket)
         db.session.commit()
-        return service_ticket_schema.jsonify(service_ticket), 201
+        
+        return jsonify({
+            "message": "Service ticket created successfully",
+            "service_ticket_id": service_ticket.id,
+            "service_ticket": service_ticket_schema.dump(service_ticket)
+        }), 201
+        
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
@@ -112,12 +118,17 @@ def get_my_tickets(current_user):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to GET a SPECIFIC service ticket by ID with validation error handling
-@service_tickets_bp.route('/<int:service_ticket_id>', methods=['GET'])
+@service_tickets_bp.route('/<int:service_ticket_id>', methods=['GET'], strict_slashes=False)
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_service_ticket(service_ticket_id):
     try:
-        service_ticket = ServiceTicket.query.get_or_404(service_ticket_id)
-        return service_ticket_schema.jsonify(service_ticket), 200
+        service_ticket = db.session.get(ServiceTicket,service_ticket_id)
+        if not service_ticket:
+            return jsonify({"error": "Service ticket not found"}), 404
+        return jsonify({
+            "message": "Service ticket retrieved successfully",
+            "service_ticket": service_ticket_schema.dump(service_ticket)
+        }), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:

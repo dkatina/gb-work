@@ -118,7 +118,7 @@ class TestServiceTicket(unittest.TestCase):
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 201)
-        data = response.get_json()
+        data = response.json['service_ticket']
         self.assertEqual(data['service_desc'], "Test Service Ticket")
         self.assertEqual(data['vin'], "1HGCM82633A123456")
     
@@ -278,34 +278,40 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertIn('Mechanic not found', response.get_data(as_text=True))
     
-    '''   
+    
     # ---------------------- Test Get Service Ticket by ID ----------------------
     def test_get_service_ticket_by_id(self):
         # Create a test customer
         test_customer = Customer(
-            name="Test Customer",
-            phone="123-456-7890",
-            email=f"testcustomer_{self.short_uuid()}@em.com"
+            name="ID Customer",
+            phone="123-436-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com",
+            password="password123"
         )
         db.session.add(test_customer)
         db.session.commit()
         
         # Create a service ticket for the test customer
-        response = self.client.post('/service_tickets', json={
+        response = self.client.post('/service_tickets/', json={
             "customer_id": test_customer.id,
-            "mechanic_id": Mechanic.query.first().id,
-            "description": "Test Service Ticket",
-            "status": "Open"
+            "vin": "5UXHM82633A123456",
+            "service_desc": "Test Get Service Ticket by ID"
         }, headers=self.auth_headers)
         
         service_ticket_id = response.json.get('service_ticket_id')
-        
+        self.assertIsNotNone(service_ticket_id, "Service ticket ID should not be None")
+        print("Create ticket response:", response.status_code, response.json) # Debugging line
+        print("Service ticket ID:", service_ticket_id)  # Debugging line
+        print("Auth headers:", self.auth_headers) # Debugging line
+
         # Get the service ticket by ID
         response = self.client.get(f'/service_tickets/{service_ticket_id}', headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 200)
         self.assertIn('Service ticket retrieved successfully', response.get_data(as_text=True))
         
+    
+    '''    
     # ---------------------- Test Invalid Get Service Ticket by ID ----------------------
     def test_invalid_get_service_ticket_by_id(self):
         # Attempt to get a service ticket by a non-existent ID

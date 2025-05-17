@@ -26,7 +26,7 @@ class TestingConfig(CommonConfig):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'  # Use in-memory SQLite database for testing
     DEBUG = True
     TESTING = True
-    CACHE_TYPE = 'SimpleCache'  # Use SimpleCache for testing
+    CACHE_TYPE = 'null'  # Use null cache for testing
     RATELIMIT_ENABLED = False
     
 class ProductionConfig(BaseConfig):
