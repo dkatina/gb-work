@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from app.blueprints.service_tickets import service_tickets_bp
 from app.blueprints.service_tickets.service_ticketsSchemas import service_tickets_schema, service_ticket_schema, update_service_ticket_schema
-from app.models import Customer, Inventory, InventoryServiceTicket, Mechanic, db, ServiceTicket
+from app.models import Admin, Customer, Inventory, InventoryServiceTicket, Mechanic, db, ServiceTicket
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
@@ -92,8 +92,9 @@ def get_service_tickets():
 
 
 # Endpoint to GET ALL service tickets for a specific customer or mechanic requiring authentication and uses validation error handling
-@service_tickets_bp.route('/my-tickets', methods=['GET'])
+@service_tickets_bp.route('/my-tickets', methods=['GET'], strict_slashes=False)
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
+@token_required
 def get_my_tickets(current_user):
     try:
         if isinstance(current_user, Customer):
