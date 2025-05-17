@@ -35,13 +35,15 @@ class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
         return data
         
 class UpdateServiceTicketSchema(ma.Schema):
-    add_mechanic_ids = fields.List(fields.Int(), required=True)
-    remove_mechanic_ids = fields.List(fields.Int(), required=True)
+    add_mechanic_ids = fields.List(fields.Int(), required=False, load_default=[])
+    remove_mechanic_ids = fields.List(fields.Int(), required=False, load_default=[])
+    service_desc = fields.Str(required=False)
+    vin = fields.Str(required=False)
     class Meta:
-        fields = ('add_mechanic_ids', 'remove_mechanic_ids')
-    
-    
-# Instances for serialization    
+        fields = ('add_mechanic_ids', 'remove_mechanic_ids', 'service_desc', 'vin')
+
+
+# Instances for serialization
 service_ticket_schema = ServiceTicketSchema()
 service_tickets_schema = ServiceTicketSchema(many=True)
 update_service_ticket_schema = UpdateServiceTicketSchema()

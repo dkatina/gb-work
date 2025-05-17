@@ -135,25 +135,37 @@ def get_service_ticket(service_ticket_id):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing service ticket with validation error handling
-@service_tickets_bp.route('/<int:service_ticket_id>', methods=['PUT'])
+@service_tickets_bp.route('/<int:service_ticket_id>', methods=['PUT'], strict_slashes=False)
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_service_ticket(service_ticket_id):
     try:
-        service_ticket_update = update_service_ticket_schema.load(request.json)
+        service_ticket_update = update_service_ticket_schema.load(request.json, partial=True)
     except ValidationError as err:
         return jsonify(err.messages), 400
     
     query = select(ServiceTicket).where(ServiceTicket.id == service_ticket_id)
     service_ticket = db.session.execute(query).scalars().first()
+    if not service_ticket:
+        return jsonify({"error": "Service ticket not found"}), 404
     
-    for mechanic_id in service_ticket_update['add_mechanic_ids']:
+    # Update the vin if provided
+    if 'vin' in service_ticket_update:
+        service_ticket.vin = service_ticket_update['vin']
+    
+    # Update the service ticket description if provided
+    if 'service_desc' in service_ticket_update:
+        service_ticket.service_desc = service_ticket_update['service_desc']
+    
+    # Add mechanics to the service ticket
+    for mechanic_id in service_ticket_update.get('add_mechanic_ids', []):
         query = select(Mechanic).where(Mechanic.id == mechanic_id)
         mechanic = db.session.execute(query).scalars().first()
         
         if mechanic and mechanic not in service_ticket.mechanics:
             service_ticket.mechanics.append(mechanic)
-            
-    for mechanic_id in service_ticket_update['remove_mechanic_ids']:
+
+    # Remove mechanics from the service ticket
+    for mechanic_id in service_ticket_update.get('remove_mechanic_ids', []):
         query = select(Mechanic).where(Mechanic.id == mechanic_id)
         mechanic = db.session.execute(query).scalars().first()
         
@@ -161,11 +173,14 @@ def update_service_ticket(service_ticket_id):
             service_ticket.mechanics.remove(mechanic)
 
     db.session.commit()
-    return service_ticket_schema.jsonify(service_ticket), 200
+    return jsonify({
+        "message": "Service ticket updated successfully",
+        "service_ticket": service_ticket_schema.dump(service_ticket)
+    }), 200
 
 
 # Endpoint to Add a part to an existing service ticket with validation error handling
-@service_tickets_bp.route('/<int:service_ticket_id>/add_part', methods=['PUT'])
+@service_tickets_bp.route('/<int:service_ticket_id>/add_part', methods=['PUT'], strict_slashes=False)
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def add_part_to_service_ticket(service_ticket_id):
     try:
@@ -202,7 +217,7 @@ def add_part_to_service_ticket(service_ticket_id):
 
 
 # Endpoint to DELETE a service ticket with validation error handling
-@service_tickets_bp.route('/<int:service_ticket_id>', methods=['DELETE'])
+@service_tickets_bp.route('/<int:service_ticket_id>', methods=['DELETE'], strict_slashes=False)
 @limiter.limit("2 per day")
 def delete_service_ticket(service_ticket_id):
     query = select(ServiceTicket).where(ServiceTicket.id == service_ticket_id)

@@ -44,7 +44,7 @@ def get_inventory(id):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing inventory item with validation error handling
-@inventory_bp.route('/<int:id>', methods=['PUT'])
+@inventory_bp.route('/<int:id>', methods=['PUT'], strict_slashes=False)
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_inventory(id):
     try:
@@ -68,7 +68,7 @@ def update_inventory(id):
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to DELETE an inventory item by id with validation error handling
-@inventory_bp.route('/<int:id>', methods=['DELETE'])
+@inventory_bp.route('/<int:id>', methods=['DELETE'], strict_slashes=False)
 @limiter.limit("2 per day")
 def delete_inventory(id):
     try:

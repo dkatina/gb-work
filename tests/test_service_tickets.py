@@ -319,37 +319,48 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertIn('Service ticket not found', response.get_data(as_text=True))
     
-    '''   
+    
     # ---------------------- Test Update Existing Service Ticket ----------------------
     def test_update_service_ticket(self):
         # Create a test customer
         test_customer = Customer(
-            name="Test Customer",
-            phone="123-456-7890",
-            email=f"testcustomer_{self.short_uuid()}@em.com"
+            name="UpdateST Customer",
+            phone="723-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com",
+            password="password123"
         )
         db.session.add(test_customer)
         db.session.commit()
         
         # Create a service ticket for the test customer
-        response = self.client.post('/service_tickets', json={
+        response = self.client.post('/service_tickets/', json={
             "customer_id": test_customer.id,
-            "mechanic_id": Mechanic.query.first().id,
-            "description": "Test Service Ticket",
-            "status": "Open"
+            "vin": "5UXHM82633A123456",
+            "service_desc": "Test Update Service Ticket"
         }, headers=self.auth_headers)
         
         service_ticket_id = response.json.get('service_ticket_id')
         
+        # Updating the service ticket with new description and VIN
+        updated_desc = "Updated Service Ticket Description"
+        updated_vin = "5UXHM82633A123456"
+        
         # Update the service ticket
         response = self.client.put(f'/service_tickets/{service_ticket_id}', json={
-            "description": "Updated Service Ticket",
-            "status": "In Progress"
+            "service_desc": updated_desc,
+            "vin": updated_vin,
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Service ticket updated successfully', response.get_data(as_text=True))
+        response_json = response.get_json()
+        self.assertIsNotNone(response_json, "Response JSON should not be None")
         
+        ticket = response_json.get('service_ticket')
+        self.assertIsNotNone(ticket, "Response should include 'service_ticket' key")
+        self.assertEqual(ticket.get('service_desc'), updated_desc)
+        self.assertEqual(ticket.get('vin'), updated_vin)
+
+    '''
     # ---------------------- Test Invalid Update Existing Service Ticket ----------------------
     def test_invalid_update_service_ticket(self):
         # Attempt to update a service ticket with a non-existent ID
