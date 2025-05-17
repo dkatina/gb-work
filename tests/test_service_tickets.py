@@ -261,15 +261,15 @@ class TestServiceTicket(unittest.TestCase):
         self.assertTrue(any(test_mechanic.id in ticket["mechanic_ids"] for ticket in response.json))
 
 
-    '''
     # ---------------------- Test Invalid Get All Service Tickets for Specific Customer ----------------------
     def test_invalid_get_all_service_tickets_for_customer(self):
         # Attempt to get all service tickets for a non-existent customer
-        response = self.client.get('/service_tickets/customer/99999999', headers=self.auth_headers)
+        response = self.client.get('/service_tickets/my-tickets/99999999', headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 404)
         self.assertIn('Customer not found', response.get_data(as_text=True))
-        
+    
+    '''    
     # ---------------------- Test Invalid Get All Service Tickets for Specific Mechanic ----------------------
     def test_invalid_get_all_service_tickets_for_mechanic(self):
         # Attempt to get all service tickets for a non-existent mechanic
