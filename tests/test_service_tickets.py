@@ -360,18 +360,19 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(ticket.get('service_desc'), updated_desc)
         self.assertEqual(ticket.get('vin'), updated_vin)
 
-    '''
+    
     # ---------------------- Test Invalid Update Existing Service Ticket ----------------------
     def test_invalid_update_service_ticket(self):
         # Attempt to update a service ticket with a non-existent ID
         response = self.client.put('/service_tickets/99999999', json={
-            "description": "Updated Service Ticket",
-            "status": "In Progress"
+            "service_desc": "Updated Service Ticket",
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 404)
         self.assertIn('Service ticket not found', response.get_data(as_text=True))
-        
+    
+    
+    '''    
     # ---------------------- Test Add a Part to a Service Ticket using PUT ----------------------
     def test_add_part_to_service_ticket(self):
         # Create a test customer
