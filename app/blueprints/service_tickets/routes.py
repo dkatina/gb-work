@@ -186,18 +186,25 @@ def add_part_to_service_ticket(service_ticket_id):
     try:
         # Get the data from the request body
         data = request.get_json()
+        if not data or 'inventory_id' not in data or 'quantity' not in data:
+            return jsonify({"error": "Missing inventory_id or quantity"}), 400
         
         # Get the service ticket and inventory item from the database
-        service_ticket = ServiceTicket.query.get_or_404(service_ticket_id)
-        inventory_item = Inventory.query.get_or_404(data['inventory_id'])
+        service_ticket = ServiceTicket.query.get(service_ticket_id)
+        if not service_ticket:
+            return jsonify({"error": "Service ticket not found"}), 404
         
+        inventory_item = Inventory.query.get(data.get('inventory_id'))
+        if not inventory_item:
+            return jsonify({"error": "Inventory item not found"}), 404
+    
         # Check if the inventory item is already linked to the service ticket
         existing_link = InventoryServiceTicket.query.filter_by(
             service_ticket_id=service_ticket.id,
             inventory_id=inventory_item.id
         ).first()
         if existing_link:
-            return jsonify({"error": "This part is already linked to the service ticket"}), 400
+            return jsonify({"error": "This product is already linked to the service ticket"}), 400
 
         # Create a new InventoryServiceTicket instance
         inventory_service_ticket = InventoryServiceTicket(
@@ -209,7 +216,9 @@ def add_part_to_service_ticket(service_ticket_id):
         db.session.add(inventory_service_ticket)
         db.session.commit()
         
-        return jsonify({"message": "Product added successfully", "inventory_service_ticket_id": inventory_service_ticket.id}), 201
+        return jsonify({"message": "Product added successfully", 
+                        "inventory_service_ticket_id": inventory_service_ticket.id
+                        }), 201
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:

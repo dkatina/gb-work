@@ -4,6 +4,7 @@ from app import create_app
 from app.models import Inventory, db, Mechanic, Admin, ServiceTicket, Customer
 import unittest
 from app.config import TestingConfig
+from app.utils.util import not_found
 
 # python -m unittest discover tests -v
 # python -m unittest tests.test_service_tickets -v
@@ -403,7 +404,7 @@ class TestServiceTicket(unittest.TestCase):
         db.session.commit()
         
         # Add a part to the service ticket
-        response = self.client.put(f'/service_tickets/{service_ticket_id}/add_product', json={
+        response = self.client.put(f'/service_tickets/{service_ticket_id}/add_product/', json={
             "inventory_id": test_product.id,
             "quantity": 1
         }, headers=self.auth_headers)
@@ -412,18 +413,27 @@ class TestServiceTicket(unittest.TestCase):
         data = response.get_json()
         self.assertEqual(data.get('message'), 'Product added successfully')
     
-    '''    
-    # ---------------------- Test Invalid Adding Part to Service Ticket using PUT ----------------------
-    def test_invalid_add_part_to_service_ticket(self):
-        # Attempt to add a part to a service ticket with a non-existent ID
-        response = self.client.put('/service_tickets/99999999/add_part', json={
-            "part_name": "Test Part",
-            "part_price": 100.00
+
+    # ---------------------- Test Invalid Adding Product to Service Ticket using PUT ----------------------
+    def test_invalid_add_product_to_service_ticket(self):
+        # Create a test product
+        test_product = Inventory(
+            name="Product Test",
+            price=150.00,
+            )
+        db.session.add(test_product)
+        db.session.commit()
+        
+        # Attempt to add a product to a service ticket with a non-existent ID
+        response = self.client.put('/service_tickets/99999999/add_product/', json={
+            "inventory_id": test_product.id,
+            "quantity": 1
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 404)
         self.assertIn('Service ticket not found', response.get_data(as_text=True))
-        
+    
+    '''    
     # ---------------------- Test Delete Service Ticket ----------------------
     def test_delete_service_ticket(self):
         # Create a test customer
