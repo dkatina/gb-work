@@ -209,35 +209,59 @@ class TestServiceTicket(unittest.TestCase):
         response = self.client.get(f'/service_tickets/my-tickets/', headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(any(ticket["service_desc"] == "Test Get All Service Ticket Specific Customer" for ticket in response.json))
+        self.assertTrue(any(ticket["customer_id"] == test_customer.id for ticket in response.json))
 
 
-    '''
+    
     # ---------------------- Test Get All Service Tickets for Specific Mechanic ----------------------
     def test_get_all_service_tickets_for_mechanic(self):
         # Create a test customer
         test_customer = Customer(
-            name="Test Customer",
-            phone="123-456-7890",
-            email=f"testcustomer_{self.short_uuid()}@em.com"
+            name="Specific Customer",
+            phone="123-916-7140",
+            email=f"testcustomer_{self.short_uuid()}@em.com",
+            password="password123"
         )
         db.session.add(test_customer)
         db.session.commit()
         
+        # Create a test mechanic
+        test_mechanic = Mechanic(
+            name="Specific Mechanic",
+            phone="129-456-7890",
+            email=f"testmechanic_{self.short_uuid()}@em.com",
+            salary=60000,
+            password="password123"
+        )
+        db.session.add(test_mechanic)
+        db.session.commit()
+
         # Create a service ticket for the test customer
-        response = self.client.post('/service_tickets', json={
+        response = self.client.post('/service_tickets/', json={
             "customer_id": test_customer.id,
-            "mechanic_id": Mechanic.query.first().id,
-            "description": "Test Service Ticket",
-            "status": "Open"
+            "mechanic_ids": [test_mechanic.id],
+            "vin": "4IAEM82633A123456",
+            "service_desc": "Test Get All Service Ticket Specific Mechanic"
         }, headers=self.auth_headers)
         
+        # Login as the test mechanic
+        login_response = self.client.post('/auth/login', json={
+            "email": test_mechanic.email,
+            "password": "password123"
+        })
+        
+        self.auth_headers = {
+            'Authorization': f'Bearer {login_response.json.get("auth_token")}'
+        }
+        
         # Get all service tickets for the test mechanic
-        response = self.client.get(f'/service_tickets/mechanic/{Mechanic.query.first().id}', headers=self.auth_headers)
-        
+        response = self.client.get(f'/service_tickets/my-tickets/', headers=self.auth_headers)
+
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Service tickets retrieved successfully', response.get_data(as_text=True))
-        
+        self.assertTrue(any(test_mechanic.id in ticket["mechanic_ids"] for ticket in response.json))
+
+
+    '''
     # ---------------------- Test Invalid Get All Service Tickets for Specific Customer ----------------------
     def test_invalid_get_all_service_tickets_for_customer(self):
         # Attempt to get all service tickets for a non-existent customer
