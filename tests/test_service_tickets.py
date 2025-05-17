@@ -311,7 +311,6 @@ class TestServiceTicket(unittest.TestCase):
         self.assertIn('Service ticket retrieved successfully', response.get_data(as_text=True))
         
     
-    '''    
     # ---------------------- Test Invalid Get Service Ticket by ID ----------------------
     def test_invalid_get_service_ticket_by_id(self):
         # Attempt to get a service ticket by a non-existent ID
@@ -319,7 +318,8 @@ class TestServiceTicket(unittest.TestCase):
         
         self.assertEqual(response.status_code, 404)
         self.assertIn('Service ticket not found', response.get_data(as_text=True))
-        
+    
+    '''   
     # ---------------------- Test Update Existing Service Ticket ----------------------
     def test_update_service_ticket(self):
         # Create a test customer
