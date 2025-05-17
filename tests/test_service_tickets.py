@@ -134,31 +134,35 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('Customer ID is required', response.get_data(as_text=True))
     
-    '''    
+        
     # ---------------------- Test Get All Service Tickets ----------------------
     def test_get_all_service_tickets(self):
         # Create a service ticket
         test_customer = Customer(
-            name="Test Customer",
-            phone="123-456-7890",
-            email=f"testcustomer_{self.short_uuid()}@em.com"
+            name="Getall Customer",
+            phone="135-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com",
+            password="password123"
         )
         db.session.add(test_customer)
         db.session.commit()
         
-        response = self.client.post('/service_tickets', json={
+        response = self.client.post('/service_tickets/', json={
             "customer_id": test_customer.id,
-            "mechanic_id": Mechanic.query.first().id,
-            "description": "Test Service Ticket",
-            "status": "Open"
+            "vin": "3TNCM82633A123456",
+            "service_desc": "Test Get All Service Ticket"
         }, headers=self.auth_headers)
         
         # Get all service tickets
-        response = self.client.get('/service_tickets', headers=self.auth_headers)
-        
+        response = self.client.get('/service_tickets/', headers=self.auth_headers)
+        print("Response JSON:", response.json)  # Debugging line
+        print("Response Status Code:", response.status_code)  # Debugging line
+        print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        print("Raw Response:", response.get_data(as_text=True)) # Debugging line
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Service tickets retrieved successfully', response.get_data(as_text=True))
-        
+        self.assertIsInstance(response.json['service_tickets'], list)
+    
+    '''    
     # ---------------------- Test Invalid Get All Service Tickets ----------------------
     def test_invalid_get_all_service_tickets(self):
         # Attempt to get all service tickets without authentication
