@@ -162,15 +162,20 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json['service_tickets'], list)
     
-    '''    
+    
     # ---------------------- Test Invalid Get All Service Tickets ----------------------
     def test_invalid_get_all_service_tickets(self):
-        # Attempt to get all service tickets without authentication
-        response = self.client.get('/service_tickets')
+        response = self.client.get('/service_tickets/?page=not_a_number')
         
-        self.assertEqual(response.status_code, 401)
-        self.assertIn('Missing authorization header', response.get_data(as_text=True))
+        print("Response JSON:", response.json)  # Debugging line
+        print("Response Status Code:", response.status_code)  # Debugging line
+        print("Response Data:", response.get_data(as_text=True)) # Debugging line
         
+        self.assertEqual(response.status_code, 200, f"Expected 200 for invalid page number, got {response.status_code}")
+        self.assertEqual(response.json.get('error'), 'Page not found.')
+        self.assertEqual(len(response.json.get('service_tickets', [])), 0)
+
+    '''
     # ---------------------- Test Get All Service Tickets for Specific Customer ----------------------
     def test_get_all_service_tickets_for_customer(self):
         # Create a test customer

@@ -25,8 +25,6 @@ def create_service_ticket():
         return jsonify({"error": str(e)}), 500
 
 
-
-
 # Endpoint to GET ALL service tickets with validation error handling
 @service_tickets_bp.route('/', methods=['GET'], strict_slashes=False)
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
@@ -91,13 +89,6 @@ def get_service_tickets():
         }), 200  
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-'''try:
-        service_tickets = ServiceTicket.query.all()
-        return service_tickets_schema.jsonify(service_tickets), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500'''
 
 
 # Endpoint to GET ALL service tickets for a specific customer or mechanic requiring authentication and uses validation error handling
