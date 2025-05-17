@@ -269,15 +269,16 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertIn('Customer not found', response.get_data(as_text=True))
     
-    '''    
+        
     # ---------------------- Test Invalid Get All Service Tickets for Specific Mechanic ----------------------
     def test_invalid_get_all_service_tickets_for_mechanic(self):
         # Attempt to get all service tickets for a non-existent mechanic
-        response = self.client.get('/service_tickets/mechanic/99999999', headers=self.auth_headers)
+        response = self.client.get('/service_tickets/my-tickets/99999999', headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 404)
         self.assertIn('Mechanic not found', response.get_data(as_text=True))
-        
+    
+    '''   
     # ---------------------- Test Get Service Ticket by ID ----------------------
     def test_get_service_ticket_by_id(self):
         # Create a test customer
