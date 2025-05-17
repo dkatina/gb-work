@@ -1,7 +1,7 @@
 import uuid
 from flask import jsonify, request
 from app import create_app
-from app.models import db, Mechanic, Admin, ServiceTicket, Customer
+from app.models import Inventory, db, Mechanic, Admin, ServiceTicket, Customer
 import unittest
 from app.config import TestingConfig
 
@@ -372,37 +372,47 @@ class TestServiceTicket(unittest.TestCase):
         self.assertIn('Service ticket not found', response.get_data(as_text=True))
     
     
-    '''    
-    # ---------------------- Test Add a Part to a Service Ticket using PUT ----------------------
-    def test_add_part_to_service_ticket(self):
+        
+    # ---------------------- Test Add a product to a Service Ticket using PUT ----------------------
+    def test_add_product_to_service_ticket(self):
         # Create a test customer
         test_customer = Customer(
             name="Test Customer",
-            phone="123-456-7890",
-            email=f"testcustomer_{self.short_uuid()}@em.com"
+            phone="123-456-4290",
+            email=f"testcustomer_{self.short_uuid()}@em.com",
+            password="password123"
         )
         db.session.add(test_customer)
         db.session.commit()
         
         # Create a service ticket for the test customer
-        response = self.client.post('/service_tickets', json={
+        response = self.client.post('/service_tickets/', json={
             "customer_id": test_customer.id,
-            "mechanic_id": Mechanic.query.first().id,
-            "description": "Test Service Ticket",
-            "status": "Open"
+            "service_desc": "Test Add Part Service Ticket",
+            "vin": "6PQTM82633A123456",
         }, headers=self.auth_headers)
         
         service_ticket_id = response.json.get('service_ticket_id')
+
+        # Create a test product
+        test_product = Inventory(
+            name="Test product",
+            price=100.00,
+            )
+        db.session.add(test_product)
+        db.session.commit()
         
         # Add a part to the service ticket
-        response = self.client.put(f'/service_tickets/{service_ticket_id}/add_part', json={
-            "part_name": "Test Part",
-            "part_price": 100.00
+        response = self.client.put(f'/service_tickets/{service_ticket_id}/add_product', json={
+            "inventory_id": test_product.id,
+            "quantity": 1
         }, headers=self.auth_headers)
         
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Part added to service ticket successfully', response.get_data(as_text=True))
-        
+        self.assertEqual(response.status_code, 201)
+        data = response.get_json()
+        self.assertEqual(data.get('message'), 'Product added successfully')
+    
+    '''    
     # ---------------------- Test Invalid Adding Part to Service Ticket using PUT ----------------------
     def test_invalid_add_part_to_service_ticket(self):
         # Attempt to add a part to a service ticket with a non-existent ID

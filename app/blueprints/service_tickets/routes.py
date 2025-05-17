@@ -179,8 +179,8 @@ def update_service_ticket(service_ticket_id):
     }), 200
 
 
-# Endpoint to Add a part to an existing service ticket with validation error handling
-@service_tickets_bp.route('/<int:service_ticket_id>/add_part', methods=['PUT'], strict_slashes=False)
+# Endpoint to Add a product to an existing service ticket with validation error handling
+@service_tickets_bp.route('/<int:service_ticket_id>/add_product', methods=['PUT'], strict_slashes=False)
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def add_part_to_service_ticket(service_ticket_id):
     try:
@@ -209,10 +209,11 @@ def add_part_to_service_ticket(service_ticket_id):
         db.session.add(inventory_service_ticket)
         db.session.commit()
         
-        return jsonify({"message": "Part added successfully", "inventory_service_ticket_id": inventory_service_ticket.id}), 201
+        return jsonify({"message": "Product added successfully", "inventory_service_ticket_id": inventory_service_ticket.id}), 201
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
+        print(f"Error adding product to service ticket: {e}")  # Debugging line
         return jsonify({"error": str(e)}), 500
 
 

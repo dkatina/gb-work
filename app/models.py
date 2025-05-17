@@ -114,8 +114,13 @@ class ServiceTicket(db.Model):
                                 lazy=True, 
                                 primaryjoin='InventoryServiceTicket.service_ticket_id==ServiceTicket.id', 
                                 secondaryjoin='InventoryServiceTicket.inventory_id==Inventory.id',
-                                overlaps='inventory_links')
-    inventory_links = relationship('InventoryServiceTicket', back_populates='service_ticket', lazy=True)
+                                overlaps='inventory_links'
+                                )
+    inventory_links = relationship(
+        'InventoryServiceTicket', 
+        back_populates='service_ticket', 
+        lazy=True
+        )
     
 # Service_Mechanics class
 # This class represents the service_mechanics table in the database as a many-to-many relationship
@@ -145,8 +150,9 @@ class Inventory(db.Model):
 # This class represents the inventory_service_tickets table in the database as a many-to-many relationship
 class InventoryServiceTicket(db.Model):
     __tablename__ = 'inventory_service_tickets'
-    inventory_id = Column(Integer, ForeignKey('inventory.id'), primary_key=True)
-    service_ticket_id = Column(Integer, ForeignKey('service_tickets.id'), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    inventory_id = Column(Integer, ForeignKey('inventory.id'), nullable=False)
+    service_ticket_id = Column(Integer, ForeignKey('service_tickets.id'), nullable=False)
     quantity = Column(Integer, nullable=False, default=1)  # Quantity of the inventory item used in the service ticket
     
     # Relationship with the Inventory class and ServiceTicket class
