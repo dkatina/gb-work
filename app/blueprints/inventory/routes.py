@@ -7,7 +7,7 @@ from app.extensions import limiter, cache
 
 # ---------------- inventory Endpoints --------------------
 # Endpoint to create a new inventory product with validation error handling
-@inventory_bp.route('/', methods=['POST'])
+@inventory_bp.route('/', methods=['POST'], strict_slashes=False)
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def create_inventory():
     try:
@@ -23,8 +23,8 @@ def create_inventory():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to GET ALL inventory products with validation error handling
-@inventory_bp.route('/', methods=['GET'])
-@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
+@inventory_bp.route('/', methods=['GET'], strict_slashes=False)
+#@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_all_inventory():
     try:
         page_str = request.args.get('page', '1')
@@ -88,7 +88,7 @@ def get_all_inventory():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to GET a SPECIFIC inventory product by ID with validation error handling
-@inventory_bp.route('/<int:id>', methods=['GET'])
+@inventory_bp.route('/<int:id>', methods=['GET'], strict_slashes=False)
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_inventory(id):
     try:
@@ -121,7 +121,7 @@ def update_inventory(id):
         # Returning the updated inventory product as a JSON response
         return inventory_schema.jsonify(updated_inventory_product), 200
     except ValidationError as err:
-        return jsonify(err.messages), 400
+        return jsonify({"error": "Invalid input", "details": err.messages}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
