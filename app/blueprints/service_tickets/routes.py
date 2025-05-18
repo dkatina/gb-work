@@ -229,10 +229,17 @@ def add_part_to_service_ticket(service_ticket_id):
 # Endpoint to DELETE a service ticket with validation error handling
 @service_tickets_bp.route('/<int:service_ticket_id>', methods=['DELETE'], strict_slashes=False)
 @limiter.limit("2 per day")
-def delete_service_ticket(service_ticket_id):
-    query = select(ServiceTicket).where(ServiceTicket.id == service_ticket_id)
-    service_ticket = db.session.execute(query).scalars().first()
+@token_required
+def delete_service_ticket(current_user, service_ticket_id):
+    if not isinstance(current_user, Admin):
+        return jsonify({"error": "Only admins can delete service tickets"}), 403
     
+    # Check if the service ticket exists
+    service_ticket = db.session.get(ServiceTicket, service_ticket_id)
+    if not service_ticket:
+        return jsonify({"error": "Service ticket not found"}), 404
+    
+    # Delete the service ticket
     db.session.delete(service_ticket)
     db.session.commit()
     return jsonify({"message": f"Service ticket {service_ticket_id} deleted successfully"}), 200

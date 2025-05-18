@@ -462,12 +462,12 @@ class TestServiceTicket(unittest.TestCase):
         data = response.get_json()
         self.assertEqual(data.get('message'), f"Service ticket {service_ticket_id} deleted successfully")
     
-    '''   
+    
     # ---------------------- Test Invalid Delete Service Ticket ----------------------
     def test_invalid_delete_service_ticket(self):
         # Attempt to delete a service ticket with a non-existent ID
         response = self.client.delete('/service_tickets/99999999', headers=self.auth_headers)
         
+        data = response.get_json()
         self.assertEqual(response.status_code, 404)
-        self.assertIn('Service ticket not found', response.get_data(as_text=True))
-    '''
+        self.assertEqual(data.get('error'), 'Service ticket not found')
