@@ -209,16 +209,22 @@ class TestServiceTicket(unittest.TestCase):
         data = response.get_json()
         self.assertEqual(data.get('error'), 'Invalid input')
 
-'''
+
 # ------------------------------ Test Delete Inventory Product ------------------------------
     def test_delete_inventory_product(self):
+        # Creating a product to delete
+        new_product = Inventory(name="Product to Delete", price=10.99)
+        db.session.add(new_product)
+        db.session.commit()
+
         # Test deleting an inventory product
-        response = self.client.delete('/inventory/1', headers=self.auth_headers)
-        
+        response = self.client.delete(f'/inventory/{new_product.id}', headers=self.auth_headers)
+
         data = response.get_json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data.get('message'), 'Product deleted successfully')
-        
+        self.assertEqual(data.get('message'), 'Inventory product deleted successfully')
+
+'''       
 # ------------------------------ Test Invalid Delete Inventory Product ------------------------------
     def test_invalid_delete_inventory_product(self):
         # Test deleting an inventory product with invalid ID
