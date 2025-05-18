@@ -124,7 +124,7 @@ class TestServiceTicket(unittest.TestCase):
         self.assertIn('error', response.json)
         self.assertIn('Invalid input', response.json['error'])
 
-'''       
+    
 # ------------------------------ Test Get All Inventory Products ------------------------------
     def test_get_all_inventory_products(self):
         # Test getting all inventory products
@@ -138,7 +138,7 @@ class TestServiceTicket(unittest.TestCase):
             self.assertIn('name', product)
             self.assertIn('price', product)
             
-            
+'''           
 # ------------------------------ Test Invalid Get All Inventory Products ------------------------------
     def test_invalid_get_all_inventory_products(self):
         # Test getting all inventory products with invalid headers
