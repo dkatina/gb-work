@@ -111,7 +111,9 @@ class TestMechanic(unittest.TestCase):
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 400)
-        self.assertIn('error', response.json)
+        self.assertIn('password', response.json)
+        self.assertIn('Missing data for required field.', response.json['password'])
+
     
     # ------------Test Get All Mechanics----------------- ***
     def test_get_all_mechanics(self):
@@ -134,7 +136,7 @@ class TestMechanic(unittest.TestCase):
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         
         self.assertEqual(response.status_code, 200, f"Expected 200 for invalid page number, got {response.status_code}")
-        self.assertEqual(response.json.get('error'), 'Page not found.')
+        self.assertEqual(response.json.get('error'), 'Page not found or exceeds total pages')
         self.assertEqual(len(response.json.get('mechanics', [])), 0)
     
     # ---------------Test Get Mechanic by ID----------------- ***
@@ -171,7 +173,10 @@ class TestMechanic(unittest.TestCase):
     
     # --------------Test Invalid Get Mechanic by Name---------------- ***
     def test_get_mechanic_by_name_invalid(self):
-        response = self.client.get('/mechanics/search', headers=self.auth_headers, query_string={'name': 'Nonexistent Mechanic'})
+        response = self.client.get('/mechanics/search/?name=invalidname', headers=self.auth_headers)
+        
+        print("Status Code:", response.status_code)
+        print("Response JSON:", response.get_json())
         
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json, list)  # Check if the response is a list
@@ -246,7 +251,9 @@ class TestMechanic(unittest.TestCase):
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 400)
-        self.assertIn('error', response.json)
+        self.assertIn('email', response.json)
+        self.assertIn('password', response.json)
+        self.assertIn('salary', response.json)
     
     
     # ---------------Test Delete Mechanic---------------- ***
@@ -286,5 +293,5 @@ class TestMechanic(unittest.TestCase):
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         self.assertEqual(response.status_code, 404, f"Expected 404 for invalid mechanic ID, got {response.status_code} with body: {response.get_json()}")
-        self.assertEqual(response.json['error'], 'Mechanic not found')
+        self.assertEqual(response.json['error'], 'Mechanic not found.')
         

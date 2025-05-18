@@ -9,7 +9,7 @@ from app.utils.util import encode_token, not_found, token_required
 
 # ---------------- Mechanics Endpoints --------------------
 # Endpoint to create a new mechanic with validation error handling
-@mechanics_bp.route('/', methods=['POST'])
+@mechanics_bp.route('/', methods=['POST'], strict_slashes=False)
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def create_mechanic():
     try:
@@ -25,7 +25,7 @@ def create_mechanic():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to GET ALL mechanics with validation error handling
-@mechanics_bp.route('/', methods=['GET'])
+@mechanics_bp.route('/', methods=['GET'], strict_slashes=False)
 #@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_mechanics():
     try:
@@ -104,7 +104,7 @@ def get_mechanic(id):
         return jsonify({"error": str(e)}), 500
     
 # Endpoint to GET a list of mechanics in the order of who has worked on the most tickets with validation error handling
-@mechanics_bp.route('/most-worked', methods=['GET'])
+@mechanics_bp.route('/most-worked', methods=['GET'], strict_slashes=False)
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_most_worked_mechanics():
     try:
@@ -116,7 +116,7 @@ def get_most_worked_mechanics():
         return jsonify({"error": str(e)}), 500
     
 # Endpoint to do a search for mechanics by name using GET with query parameters and validation error handling
-@mechanics_bp.route('/search', methods=['GET'])
+@mechanics_bp.route('/search', methods=['GET'], strict_slashes=False)
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def search_mechanics():
     try:
@@ -125,10 +125,11 @@ def search_mechanics():
             return jsonify({"error": "Name query parameter is required"}), 400
         
         mechanics = Mechanic.query.filter(Mechanic.name.ilike(f"%{name}%")).all()
-        return mechanics_schema.jsonify(mechanics), 200
+        return jsonify(mechanics_schema.dump(mechanics)), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
+        print(f"Search Mechanics Exception: {e}") # Debugging line
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to UPDATE an existing mechanic with validation error handling
@@ -155,7 +156,7 @@ def update_mechanic(user, mechanic_id):
         return jsonify({"error": str(e)}), 500
     
 # Endpoint to DELETE a mechanic by id with validation error handling
-@mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
+@mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'], strict_slashes=False)
 #@limiter.limit("2 per day")
 @token_required
 def delete_mechanic(user, mechanic_id):
@@ -165,7 +166,7 @@ def delete_mechanic(user, mechanic_id):
             return jsonify({"error": "Mechanic not found."}), 404
         db.session.delete(mechanic)
         db.session.commit()
-        return jsonify({"message": "Mechanic deleted successfully"}), 200
+        return jsonify({"message": f"Mechanic {mechanic_id} deleted successfully"}), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
