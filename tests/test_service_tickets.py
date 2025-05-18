@@ -133,7 +133,7 @@ class TestServiceTicket(unittest.TestCase):
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 400)
-        self.assertIn('Customer ID is required', response.get_data(as_text=True))
+        self.assertIn('Missing data for required field.', response.get_data(as_text=True))
     
         
     # ---------------------- Test Get All Service Tickets ----------------------
@@ -264,22 +264,73 @@ class TestServiceTicket(unittest.TestCase):
 
     # ---------------------- Test Invalid Get All Service Tickets for Specific Customer ----------------------
     def test_invalid_get_all_service_tickets_for_customer(self):
+        # Creating a test customer
+        test_customer = Customer(
+            name="Invalid Customer",
+            phone="123-456-7890",
+            email=f"testcustomer_{self.short_uuid()}@em.com",
+            password="password123"
+        )
+        db.session.add(test_customer)
+        db.session.commit()
+        print("Test Customer ID:", test_customer.id)  # Debugging line
+        
+        # Logging in as the test customer
+        login_response = self.client.post('/auth/login', json={
+            "email": test_customer.email,
+            "password": "password123"
+        })
+        print("Login response data:", login_response.get_data(as_text=True))
+        token = login_response.json.get('auth_token')
+        self.auth_headers = {
+            'Authorization': f'Bearer {token}'
+        }
+        
+        # Delete the test customer
+        db.session.delete(test_customer)
+        db.session.commit()
+        
         # Attempt to get all service tickets for a non-existent customer
-        response = self.client.get('/service_tickets/my-tickets/99999999', headers=self.auth_headers)
+        response = self.client.get('/service_tickets/my-tickets/', headers=self.auth_headers)
+        self.assertEqual(response.status_code, 401)
+        self.assertIn('Unauthorized', response.get_json().get('error', ''))
         
-        self.assertEqual(response.status_code, 404)
-        self.assertIn('Customer not found', response.get_data(as_text=True))
-    
-        
+
     # ---------------------- Test Invalid Get All Service Tickets for Specific Mechanic ----------------------
     def test_invalid_get_all_service_tickets_for_mechanic(self):
+        # Create a test mechanic
+        test_mechanic = Mechanic(
+            name="Invalid Mechanic",
+            phone="123-456-7890",
+            email=f"testmechanic_{self.short_uuid()}@em.com",
+            salary=60000,
+            password="password123"
+        )
+        db.session.add(test_mechanic)
+        db.session.commit()
+
+        # Logging in as the test mechanic
+        login_response = self.client.post('/auth/login', json={
+            "email": test_mechanic.email,
+            "password": "password123"
+        })
+        token = login_response.json.get('auth_token')
+        self.auth_headers = {
+            'Authorization': f'Bearer {token}'
+        }
+
+        # Delete the test mechanic
+        db.session.delete(test_mechanic)
+        db.session.commit()
+
         # Attempt to get all service tickets for a non-existent mechanic
-        response = self.client.get('/service_tickets/my-tickets/99999999', headers=self.auth_headers)
+        response = self.client.get('/service_tickets/my-tickets/', headers=self.auth_headers)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertIn('Unauthorized', response.get_json().get('error', ''))
         
-        self.assertEqual(response.status_code, 404)
-        self.assertIn('Mechanic not found', response.get_data(as_text=True))
-    
-    
+
+
     # ---------------------- Test Get Service Ticket by ID ----------------------
     def test_get_service_ticket_by_id(self):
         # Create a test customer

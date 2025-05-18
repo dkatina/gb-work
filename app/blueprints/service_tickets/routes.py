@@ -5,7 +5,7 @@ from app.models import Admin, Customer, Inventory, InventoryServiceTicket, Mecha
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
-from app.utils.util import encode_token, token_required
+from app.utils.util import encode_token, token_required, not_found
 
 
 # ---------------------- Service Tickets Endpoints ---------------------
@@ -104,13 +104,17 @@ def get_service_tickets():
 def get_my_tickets(current_user):
     try:
         if isinstance(current_user, Customer):
-            customer_id = current_user.id
-            service_tickets = ServiceTicket.query.filter_by(customer_id=customer_id).all()
+            customer = Customer.query.get(current_user.id)
+            if not customer:
+                return not_found("Unauthorized")
+            service_tickets = ServiceTicket.query.filter_by(customer_id=customer.id).all()
         elif isinstance(current_user, Mechanic):
-            mechanic_id = current_user.id
-            service_tickets = ServiceTicket.query.filter(ServiceTicket.mechanics.any(id=mechanic_id)).all()
+            mechanic = Mechanic.query.get(current_user.id)
+            if not mechanic:
+                return not_found("Unauthorized")
+            service_tickets = ServiceTicket.query.filter(ServiceTicket.mechanics.any(id=mechanic.id)).all()
         else:
-            return jsonify({"error": "Invalid user type"}), 400
+            return not_found("Unauthorized")
         return service_tickets_schema.jsonify(service_tickets), 200
     except ValidationError as err:
         return jsonify(err.messages), 400

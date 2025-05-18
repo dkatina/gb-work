@@ -35,7 +35,7 @@ def token_required(f): # Decorator to require token for certain routes
                 token = parts[1]
         
         if not token:
-            return jsonify({'message': 'Token is missing!'}), 401
+            return jsonify({'error': 'Unauthorized'}), 401
         
         secret_key = current_app.config.get('SECRET_KEY', 'default_secret_key')
         try:
@@ -51,17 +51,17 @@ def token_required(f): # Decorator to require token for certain routes
             elif user_type == 'admin':
                 user = Admin.query.get(user_id)
             else:
-                return jsonify({'message': 'Invalid user type!'}), 401
+                return jsonify({'error': 'Invalid user type!'}), 401
             
             if not user:
-                return jsonify({'message': f'{user_type.capitalize()} not found!'}), 401
-            
+                return jsonify({'error': 'Unauthorized'}), 401
+
             # Attaching the user_type to the user object
             user.user_type = user_type
             
         except jose.JWTError as e: # Handle JWT errors
-            return jsonify({'message': 'Token is invalid!'}), 401
-        
+            return jsonify({'error': 'Unauthorized'}), 401
+
         return f(user, *args, **kwargs) # Call the original function with the user ID
     
     return decorated # Return the decorated function
