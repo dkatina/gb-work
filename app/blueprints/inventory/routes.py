@@ -92,7 +92,9 @@ def get_all_inventory():
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_inventory(id):
     try:
-        product = Inventory.query.get_or_404(id)
+        product = Inventory.query.get(id)
+        if not product:
+            return jsonify({"error": "Product not found"}), 404
         return inventory_schema.jsonify(product), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
