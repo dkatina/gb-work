@@ -19,6 +19,7 @@ def create_inventory():
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
+        print("Internal Server Error:", e)
         return jsonify({"error": str(e)}), 500
 
 # Endpoint to GET ALL inventory products with validation error handling

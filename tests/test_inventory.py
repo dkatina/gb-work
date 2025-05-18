@@ -111,7 +111,7 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.json['name'], 'Test Product')
         self.assertEqual(response.json['price'], 19.99)
         
-'''       
+    
 # ------------------------------ Test Invalid Create Inventory Product ------------------------------
     def test_invalid_create_inventory_product(self):
         # Test creating a new inventory product with invalid data
@@ -123,7 +123,8 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('error', response.json)
         self.assertIn('Invalid input', response.json['error'])
-        
+
+'''       
 # ------------------------------ Test Get All Inventory Products ------------------------------
     def test_get_all_inventory_products(self):
         # Test getting all inventory products
