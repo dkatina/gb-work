@@ -181,7 +181,7 @@ class TestServiceTicket(unittest.TestCase):
         self.assertIn('error', response.json)
         self.assertIn('Product not found', response.json['error'])
 
-'''       
+    
 # ------------------------------ Test Update Existing Inventory Product ------------------------------
     def test_update_existing_inventory_product(self):
         # Test updating an existing inventory product
@@ -196,7 +196,7 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.json['name'], 'Updated Product')
         self.assertEqual(response.json['price'], 29.99)
         
-        
+'''        
 # ------------------------------ Test Invalid Update Existing Inventory Product ------------------------------
     def test_invalid_update_existing_inventory_product(self):
         # Test updating an existing inventory product with invalid data
