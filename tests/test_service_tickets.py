@@ -433,14 +433,15 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertIn('Service ticket not found', response.get_data(as_text=True))
     
-    '''    
+        
     # ---------------------- Test Delete Service Ticket ----------------------
     def test_delete_service_ticket(self):
         # Create a test customer
         test_customer = Customer(
             name="Test Customer",
             phone="123-456-7890",
-            email=f"testcustomer_{self.short_uuid()}@em.com"
+            email=f"testcustomer_{self.short_uuid()}@em.com",
+            password="password123"
         )
         db.session.add(test_customer)
         db.session.commit()
@@ -448,9 +449,8 @@ class TestServiceTicket(unittest.TestCase):
         # Create a service ticket for the test customer
         response = self.client.post('/service_tickets', json={
             "customer_id": test_customer.id,
-            "mechanic_id": Mechanic.query.first().id,
-            "description": "Test Service Ticket",
-            "status": "Open"
+            "service_desc": "Test Delete Service Ticket",
+            "vin": "7XHQM82633A123456",
         }, headers=self.auth_headers)
         
         service_ticket_id = response.json.get('service_ticket_id')
@@ -459,8 +459,10 @@ class TestServiceTicket(unittest.TestCase):
         response = self.client.delete(f'/service_tickets/{service_ticket_id}', headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Service ticket deleted successfully', response.get_data(as_text=True))
-        
+        data = response.get_json()
+        self.assertEqual(data.get('message'), f"Service ticket {service_ticket_id} deleted successfully")
+    
+    '''   
     # ---------------------- Test Invalid Delete Service Ticket ----------------------
     def test_invalid_delete_service_ticket(self):
         # Attempt to delete a service ticket with a non-existent ID
