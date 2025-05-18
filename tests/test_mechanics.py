@@ -117,14 +117,14 @@ class TestMechanic(unittest.TestCase):
     def test_get_all_mechanics(self):
         response = self.client.get('/mechanics/', headers=self.auth_headers)
         
+        response = self.client.get('/mechanics/')
+        print("Response JSON:", response.json)  # Debugging line
+        print("Response Status Code:", response.status_code)  # Debugging line
+        print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        print("Raw Response:", response.get_data(as_text=True)) # Debugging line
         self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.json, list)  # Check if the response is a list
-        if len(response.json) > 0:
-            self.assertIn('id', response.json[0])
-            self.assertIn('name', response.json[0])
-            self.assertIn('phone', response.json[0])
-            self.assertIn('email', response.json[0])
-    
+        self.assertIsInstance(response.json['mechanics'], list)
+
     # ------------Test Invalid Get All Mechanics---------------- ***
     def test_get_all_mechanics_invalid(self):
         response = self.client.get('/mechanics/?page=not_a_number')

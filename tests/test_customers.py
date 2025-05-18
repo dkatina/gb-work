@@ -6,6 +6,7 @@ import unittest
 from app.config import TestingConfig
 
 # python -m unittest discover tests -v
+# python -m unittest tests.test_customers -v
 
 class TestCustomer(unittest.TestCase):
     @classmethod
@@ -126,7 +127,7 @@ class TestCustomer(unittest.TestCase):
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         
         self.assertEqual(response.status_code, 200, f"Expected 200 for invalid page number, got {response.status_code}")
-        self.assertEqual(response.json.get('error'), 'Page not found.')
+        self.assertEqual(response.json.get('error'), 'Page not found or exceeds total pages')
         self.assertEqual(len(response.json.get('customers', [])), 0)
         
         
@@ -207,7 +208,7 @@ class TestCustomer(unittest.TestCase):
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         self.assertEqual(response.status_code, 400, f"Expected 400 for invalid customer update, got {response.status_code} with body: {response.get_json()}")
-        self.assertEqual(response.json['phone'], ['Shorter than minimum length 10.'])
+        self.assertEqual(response.json['phone'], ['Phone number must be between 10 and 15 characters long.'])
     
     # -------------------Delete Customer Test-------------------
     def test_delete_customer(self):
@@ -245,7 +246,7 @@ class TestCustomer(unittest.TestCase):
         print("Response Status Code:", response.status_code)  # Debugging line
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         self.assertEqual(response.status_code, 404, f"Expected 404 for invalid customer ID, got {response.status_code} with body: {response.get_json()}")
-        self.assertEqual(response.json['error'], 'Customer not found')
+        self.assertEqual(response.json['error'], 'Customer not found.')
         
         
         

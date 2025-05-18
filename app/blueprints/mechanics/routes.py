@@ -97,7 +97,7 @@ def get_mechanic(id):
         mechanic = Mechanic.query.get_or_404(id)
         return MechanicSchema().jsonify(mechanic), 200
     except NotFound:
-        return jsonify({"error": "Mechanic not found"}), 404
+        return jsonify({"error": "Mechanic not found."}), 404
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
@@ -160,7 +160,9 @@ def update_mechanic(user, mechanic_id):
 @token_required
 def delete_mechanic(user, mechanic_id):
     try:
-        mechanic = Mechanic.query.get_or_404(mechanic_id)
+        mechanic = Mechanic.query.get(mechanic_id)
+        if not mechanic:
+            return jsonify({"error": "Mechanic not found."}), 404
         db.session.delete(mechanic)
         db.session.commit()
         return jsonify({"message": "Mechanic deleted successfully"}), 200

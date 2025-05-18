@@ -138,12 +138,15 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
 @token_required
 def delete_customer(user, customer_id): # Receiving customer_id from the token
     try:
-        customer = Customer.query.get_or_404(customer_id)
+        customer = Customer.query.get(customer_id)
         
         # Check if the customer_id in the token matches the customer_id in the URL
         if getattr(user, 'user_type', None) != 'admin' and user.id != customer_id:
             return jsonify({"error": "Unauthorized access"}), 403
-    
+
+        if not customer:
+            return jsonify({"error": "Customer not found."}), 404
+
         db.session.delete(customer)
         db.session.commit()
         return jsonify({"message": f"Customer {customer_id} deleted successfully"}), 200

@@ -123,7 +123,7 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('name', response.json)
         self.assertIn('price', response.json)
-        self.assertIn('Name cannot be empty', response.json['name'])
+        self.assertIn('Name cannot be empty.', response.json['name'])
         self.assertIn('Price must be greater than zero.', response.json['price'])
 
     
