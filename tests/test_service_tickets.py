@@ -173,7 +173,7 @@ class TestServiceTicket(unittest.TestCase):
         print("Response Data:", response.get_data(as_text=True)) # Debugging line
         
         self.assertEqual(response.status_code, 200, f"Expected 200 for invalid page number, got {response.status_code}")
-        self.assertEqual(response.json.get('error'), 'Page not found.')
+        self.assertEqual(response.json.get('error'), 'Page not found or exceeds total pages')
         self.assertEqual(len(response.json.get('service_tickets', [])), 0)
 
     

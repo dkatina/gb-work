@@ -33,7 +33,7 @@ def create_service_ticket():
 
 # Endpoint to GET ALL service tickets with validation error handling
 @service_tickets_bp.route('/', methods=['GET'], strict_slashes=False)
-@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
+#@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_service_tickets():
     try:
         page_str = request.args.get('page', '1')
