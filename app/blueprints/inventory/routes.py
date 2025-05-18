@@ -27,8 +27,63 @@ def create_inventory():
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_all_inventory():
     try:
-        products = Inventory.query.all()
-        return inventorys_schema.jsonify(products), 200
+        page_str = request.args.get('page', '1')
+        per_page_str = request.args.get('per_page', '10')
+        
+        try:
+            page = int(page_str)
+            per_page = int(per_page_str)
+        except ValueError:
+            return jsonify({"current_page": page_str,
+                "products": [],
+                "has_next": False,
+                "has_prev": False,
+                "page": page_str,
+                "per_page": per_page_str,
+                "total": 0,
+                "total_pages": 0,
+                "error": "Page not found or exceeds total pages"
+            }), 200
+            
+        # Using .order_by() to ensure consisten pagination
+        base_query = Inventory.query.order_by(Inventory.id)
+        # Getting total number of inventory products
+        total = base_query.count()
+        # Calculating total pages
+        total_pages = (total + per_page - 1) // per_page
+        
+        print(f"[DEBUG] total: {total}, total_pages: {total_pages}, requested page: {page}") # Debugging line
+        
+        # Checking if the requested page exceeds the total pages
+        if total == 0 or page > total_pages or page < 1:
+            return jsonify({
+                            "current_page": page,
+                            "products": [],
+                            "has_next": False,
+                            "has_prev": False,
+                            "page": page,
+                            "per_page": per_page,
+                            "total": total,
+                            "total_pages": total_pages,
+                            "error": "Page not found or exceeds total pages"
+                            }), 200
+        
+        # Paginating the query
+        pagination = base_query.paginate(page=page, per_page=per_page, error_out=False)
+        products = pagination.items
+        
+        print(f"Requested page: {page}, total pages: {pagination.pages}") # Debugging line
+
+        return jsonify({
+            "current_page": pagination.page,
+            "products": inventorys_schema.dump(products),
+            "has_next": pagination.has_next,
+            "has_prev": pagination.has_prev,
+            "page": pagination.page,
+            "per_page": pagination.per_page,
+            "total": pagination.total,
+            "total_pages": pagination.pages
+        }), 200  
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

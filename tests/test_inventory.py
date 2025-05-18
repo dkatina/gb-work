@@ -121,8 +121,10 @@ class TestServiceTicket(unittest.TestCase):
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 400)
-        self.assertIn('error', response.json)
-        self.assertIn('Invalid input', response.json['error'])
+        self.assertIn('name', response.json)
+        self.assertIn('price', response.json)
+        self.assertIn('Name cannot be empty', response.json['name'])
+        self.assertIn('Price must be greater than zero.', response.json['price'])
 
     
 # ------------------------------ Test Get All Inventory Products ------------------------------
@@ -131,24 +133,33 @@ class TestServiceTicket(unittest.TestCase):
         response = self.client.get('/inventory/', headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.json, list)
-        self.assertGreater(len(response.json), 0)  # Ensure there is at least one product
-        for product in response.json:
+        self.assertIn('products', response.json)
+        self.assertIsInstance(response.json['products'], list)
+        self.assertGreater(len(response.json['products']), 0)  # Ensure there is at least one product
+        for product in response.json['products']:
             self.assertIn('id', product)
             self.assertIn('name', product)
             self.assertIn('price', product)
-            
-'''           
+
+        # Ensure the product has the correct attributes
+        first_product = response.json["products"][0]
+        self.assertEqual(first_product['name'], 'Test Product')
+        self.assertEqual(first_product['price'], 19.99)
+
 # ------------------------------ Test Invalid Get All Inventory Products ------------------------------
     def test_invalid_get_all_inventory_products(self):
         # Test getting all inventory products with invalid headers
-        response = self.client.get('/inventory/', headers={
-            'Authorization': 'Bearer invalid_token'
-        })
+        response = self.client.get('/inventory/?page=not_a_number')
         
-        self.assertEqual(response.status_code, 401)
-        self.assertIn('error', response.json)
-        self.assertIn('Invalid token', response.json['error'])
+        print("Response JSON:", response.json)  # Debugging line
+        print("Response Status Code:", response.status_code)  # Debugging line
+        print("Response Data:", response.get_data(as_text=True)) # Debugging line
+        
+        self.assertEqual(response.status_code, 200, f"Expected 200 for invalid page number, got {response.status_code}")
+        self.assertEqual(response.json.get('error'), 'Page not found or exceeds total pages')
+        self.assertEqual(len(response.json.get('products', [])), 0)
+
+'''
 # ------------------------------ Test Get Specific Inventory Product ------------------------------
     def test_get_specific_inventory_product(self):
         # Test getting a specific inventory product
