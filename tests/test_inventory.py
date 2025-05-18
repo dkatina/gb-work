@@ -196,23 +196,20 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.json['name'], 'Updated Product')
         self.assertEqual(response.json['price'], 29.99)
         
-'''        
+        
 # ------------------------------ Test Invalid Update Existing Inventory Product ------------------------------
     def test_invalid_update_existing_inventory_product(self):
         # Test updating an existing inventory product with invalid data
         response = self.client.put('/inventory/1', json={
             "name": "",
-            "description": "Updated Description",
-            "quantity": -5,
-            "price": -29.99,
-            "location": ""
+            "price": -29.99 
         }, headers=self.auth_headers)
     
         self.assertEqual(response.status_code, 400)
         data = response.get_json()
         self.assertEqual(data.get('error'), 'Invalid input')
 
-
+'''
 # ------------------------------ Test Delete Inventory Product ------------------------------
     def test_delete_inventory_product(self):
         # Test deleting an inventory product
