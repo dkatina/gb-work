@@ -224,7 +224,7 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data.get('message'), 'Inventory product deleted successfully')
 
-'''       
+    
 # ------------------------------ Test Invalid Delete Inventory Product ------------------------------
     def test_invalid_delete_inventory_product(self):
         # Test deleting an inventory product with invalid ID
@@ -234,4 +234,3 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data.get('error'), 'Product not found')
         
-'''

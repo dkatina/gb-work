@@ -130,7 +130,9 @@ def update_inventory(id):
 @limiter.limit("2 per day")
 def delete_inventory(id):
     try:
-        inventory_product = Inventory.query.get_or_404(id)
+        inventory_product = Inventory.query.get(id)
+        if not inventory_product:
+            return jsonify({"error": "Product not found"}), 404
         db.session.delete(inventory_product)
         db.session.commit()
         return jsonify({"message": "Inventory product deleted successfully"}), 200
