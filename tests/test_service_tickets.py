@@ -458,8 +458,8 @@ class TestServiceTicket(unittest.TestCase):
         # Delete the service ticket
         response = self.client.delete(f'/service_tickets/{service_ticket_id}', headers=self.auth_headers)
         
-        self.assertEqual(response.status_code, 200)
         data = response.get_json()
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(data.get('message'), f"Service ticket {service_ticket_id} deleted successfully")
     
     

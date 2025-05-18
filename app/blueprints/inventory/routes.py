@@ -6,76 +6,76 @@ from marshmallow import ValidationError
 from app.extensions import limiter, cache
 
 # ---------------- inventory Endpoints --------------------
-# Endpoint to create a new inventory item with validation error handling
+# Endpoint to create a new inventory product with validation error handling
 @inventory_bp.route('/', methods=['POST'])
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def create_inventory():
     try:
         data = request.get_json()
-        inventory_items = inventory_schema.load(data, session=db.session)
-        db.session.add(inventory_items)
+        product = inventory_schema.load(data, session=db.session)
+        db.session.add(product)
         db.session.commit()
-        return inventory_schema.jsonify(inventory_items), 201
+        return inventory_schema.jsonify(product), 201
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to GET ALL inventory items with validation error handling
+# Endpoint to GET ALL inventory products with validation error handling
 @inventory_bp.route('/', methods=['GET'])
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_all_inventory():
     try:
-        inventory_items = Inventory.query.all()
-        return inventorys_schema.jsonify(inventory_items), 200
+        products = Inventory.query.all()
+        return inventorys_schema.jsonify(products), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to GET a SPECIFIC inventory item by ID with validation error handling
+# Endpoint to GET a SPECIFIC inventory product by ID with validation error handling
 @inventory_bp.route('/<int:id>', methods=['GET'])
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
 def get_inventory(id):
     try:
-        inventory_items = Inventory.query.get_or_404(id)
-        return inventory_schema.jsonify(inventory_items), 200
+        product = Inventory.query.get_or_404(id)
+        return inventory_schema.jsonify(product), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to UPDATE an existing inventory item with validation error handling
+# Endpoint to UPDATE an existing inventory product with validation error handling
 @inventory_bp.route('/<int:id>', methods=['PUT'], strict_slashes=False)
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_inventory(id):
     try:
-        print(f"Updating inventory item with ID: {id}")
-        # Fetching the inventory item by ID or raising a 404 error if not found
-        inventory_item = Inventory.query.get_or_404(id)
-        print(f"Found inventory item: {inventory_item}")
+        print(f"Updating inventory product with ID: {id}")
+        # Fetching the inventory product by ID or raising a 404 error if not found
+        inventory_product = Inventory.query.get_or_404(id)
+        print(f"Found inventory product: {inventory_product}")
         # Getting data from the request body
         data = request.get_json()
         print(f"Data to update: {data}")
         # Loading the data into the schema for validation and updating
-        updated_inventory_item = inventory_schema.load(data, instance=inventory_item, session=db.session)
-        print(f"Updated inventory item: {updated_inventory_item}")
+        updated_inventory_product = inventory_schema.load(data, instance=inventory_product, session=db.session)
+        print(f"Updated inventory product: {updated_inventory_product}")
         # Committing the changes to the database
         db.session.commit()
-        # Returning the updated inventory item as a JSON response
-        return inventory_schema.jsonify(updated_inventory_item), 200
+        # Returning the updated inventory product as a JSON response
+        return inventory_schema.jsonify(updated_inventory_product), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Endpoint to DELETE an inventory item by id with validation error handling
+# Endpoint to DELETE an inventory product by id with validation error handling
 @inventory_bp.route('/<int:id>', methods=['DELETE'], strict_slashes=False)
 @limiter.limit("2 per day")
 def delete_inventory(id):
     try:
-        inventory_items = Inventory.query.get_or_404(id)
-        db.session.delete(inventory_items)
+        inventory_product = Inventory.query.get_or_404(id)
+        db.session.delete(inventory_product)
         db.session.commit()
-        return jsonify({"message": "inventory deleted successfully"}), 200
+        return jsonify({"message": "Inventory product deleted successfully"}), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
