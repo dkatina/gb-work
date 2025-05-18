@@ -159,7 +159,7 @@ class TestServiceTicket(unittest.TestCase):
         self.assertEqual(response.json.get('error'), 'Page not found or exceeds total pages')
         self.assertEqual(len(response.json.get('products', [])), 0)
 
-'''
+
 # ------------------------------ Test Get Specific Inventory Product ------------------------------
     def test_get_specific_inventory_product(self):
         # Test getting a specific inventory product
@@ -170,6 +170,8 @@ class TestServiceTicket(unittest.TestCase):
         self.assertIn('name', response.json)
         self.assertIn('price', response.json)
         self.assertEqual(response.json['id'], 1)
+        
+'''
 # ------------------------------ Test Invalid Get Specific Inventory Product ------------------------------
     def test_invalid_get_specific_inventory_product(self):
         # Test getting a specific inventory product with invalid ID
