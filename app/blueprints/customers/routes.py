@@ -11,7 +11,7 @@ from werkzeug.exceptions import NotFound
 # -----------------Customers Endpoints--------------------
 
 # Endpoint to CREATE a new customer with validation error handling
-@customers_bp.route('/', methods=['POST'])
+@customers_bp.route('/', methods=['POST'], strict_slashes=False)
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
 def create_customer():
     try:

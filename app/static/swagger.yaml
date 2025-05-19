@@ -17,12 +17,26 @@ produces:
 paths: 
     # ------------------------ Authentication Login for Customers / Mechanic ------------------------
     # Authentication login and registration
-    /api/auth/login:
+    /auth/login:
       post:
         tags:
           - "Authentication"
         summary: "User login"
-        description: "Authenticate a user (customer or mechanic) and return a token."
+        description: > 
+          Authenticate a user (customer or mechanic) and return a token.
+
+          ### Test Accounts:
+
+          **Customer**
+            - Email: john.customer@example.com
+            - Password: password123
+          
+          **Mechanic**
+            - Email: jane.mechanic@example.com
+            - Password: password123
+          
+          Use the token provided in the "Authorize" button to access protected routes with the below format:
+          'Bearer your.token.here'
         parameters:
           - in: body
             name: login_info
@@ -39,7 +53,7 @@ paths:
 
     # ------------------------ Customers ------------------------
     # Get all customers and create a new customer      
-    /api/customers:
+    /customers:
       # Get all customers
       get:
         tags:
@@ -53,6 +67,7 @@ paths:
               type: array
               items:
                 $ref: '#/definitions/Customer'
+      
       # Create a new customer
       post:
         tags:
@@ -64,7 +79,7 @@ paths:
             name: customer
             required: true
             schema:
-              $ref: '#/definitions/Customer'
+              $ref: '#/definitions/CustomerInput'
         responses:
           201:
             description: "Customer created successfully."
@@ -72,7 +87,7 @@ paths:
               $ref: '#/definitions/Customer'
 
     # Get, update, and delete a specific customer by ID
-    /api/customers/{customer_id}:
+    /customers/{customer_id}:
       # Get a specific customer by ID
       get:
         tags:
@@ -91,12 +106,15 @@ paths:
               $ref: '#/definitions/Customer'
           404:
             description: "Customer not found."
+    
       # Update a specific customer by ID
       put:
         tags:
           - "Customers"
         summary: "Update a customer"
         description: "Update an existing customer's information."
+        security:
+          - BearerAuth: []
         parameters:
           - name: customer_id
             in: path
@@ -106,7 +124,7 @@ paths:
             name: customer
             required: true
             schema:
-              $ref: '#/definitions/Customer'
+              $ref: '#/definitions/CustomerInput'
         responses:
           200:
             description: "Customer updated successfully."
@@ -114,6 +132,7 @@ paths:
               $ref: '#/definitions/Customer'
           404:
             description: "Customer not found."
+    
       # Delete a specific customer by ID
       delete:
         tags:
@@ -128,12 +147,14 @@ paths:
         responses:
           204:
             description: "Customer deleted successfully."
+          403:
+            description: "Unauthorized access"
           404:
             description: "Customer not found."
 
     # ------------------------ Mechanics -----------------------
     # Get all mechanics and create a new mechanic
-    /api/mechanics:
+    /mechanics:
       # Get all mechanics
       get:
         tags:
@@ -147,6 +168,7 @@ paths:
               type: array
               items:
                 $ref: '#/definitions/Mechanic'
+      
       # Create a new mechanic
       post:
         tags:
@@ -166,7 +188,7 @@ paths:
               $ref: '#/definitions/Mechanic'
 
     # Get, update, and delete a specific mechanic by ID
-    /api/mechanics/{mechanic_id}:
+    /mechanics/{mechanic_id}:
       # Get a specific mechanic by ID
       get:
         tags:
@@ -224,8 +246,9 @@ paths:
             description: "Mechanic deleted successfully."
           404:
             description: "Mechanic not found."
+    
     # Get the most worked mechanic
-    /api/mechanics/most-worked:
+    /mechanics/most-worked:
       get:
         tags:
           - "Mechanics"
@@ -238,8 +261,9 @@ paths:
               $ref: '#/definitions/Mechanic'
           404:
             description: "No mechanics found."
+    
     # Search mechanics by name
-    /api/mechanics/search:
+    /mechanics/search:
       get:
         tags:
           - "Mechanics"
@@ -262,7 +286,7 @@ paths:
 
     # ------------------------ Inventory -----------------------
     # Get all inventory products and create a new inventory product
-    /api/inventory:
+    /inventory:
       # Get all inventory products
       get:
         tags:
@@ -275,7 +299,8 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/definitions/InventoryItem'
+                $ref: '#/definitions/InventoryProduct'
+      
       # Create a new inventory product
       post:
         tags:
@@ -292,9 +317,10 @@ paths:
           201:
             description: "Inventory Product created successfully."
             schema:
-              $ref: '#/definitions/InventoryItem'
+              $ref: '#/definitions/InventoryProduct'
+    
     # Get, update, and delete a specific Inventory Product by ID
-    /api/inventory/{inventory_id}:
+    /inventory/{inventory_id}:
       # Get a specific inventory product by ID
       get:
         tags:
@@ -310,9 +336,10 @@ paths:
           200:
             description: "Inventory Product details."
             schema:
-              $ref: '#/definitions/InventoryItem'
+              $ref: '#/definitions/InventoryProduct'
           404:
             description: "Inventory Product not found."
+      
       # Update a specific Inventory Product by ID
       put:
         tags:
@@ -333,9 +360,10 @@ paths:
           200:
             description: "Inventory Product updated successfully."
             schema:
-              $ref: '#/definitions/InventoryItem'
+              $ref: '#/definitions/InventoryProduct'
           404:
             description: "Inventory Product not found."
+      
       # Delete a specific Inventory Product by ID
       delete:
         tags:
@@ -352,8 +380,9 @@ paths:
             description: "Inventory Product deleted successfully."
           404:
             description: "Inventory Product not found."
+    
     # Search inventory products by name
-    /api/inventory/search:
+    /inventory/search:
       get:
         tags:
           - "Inventory"
@@ -371,13 +400,13 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/definitions/InventoryItem'
+                $ref: '#/definitions/InventoryProduct'
           404:
             description: "No inventory products found."
 
     # ------------------------ Service Tickets -----------------------
     # Get all service tickets and create a new service ticket
-    /api/service-tickets:
+    /service-tickets:
       # Get all service tickets
       get:
         tags:
@@ -391,6 +420,7 @@ paths:
               type: array
               items:
                 $ref: '#/definitions/ServiceTicket'
+      
       # Create a new service ticket
       post:
         tags:
@@ -408,26 +438,28 @@ paths:
             description: "Service ticket created successfully."
             schema:
               $ref: '#/definitions/ServiceTicket'
-    # Get, update, and delete a specific service ticket by ID
-    /api/service-tickets/{ticket_id}:
-      # Get a specific service ticket by ID
-      get:
-        tags:
-          - "Service Tickets"
-        summary: "Get a service ticket by ID"
-        description: "Retrieve a specific service ticket by its ID."
-        parameters:
-          - name: ticket_id
-            in: path
-            required: true
-            type: integer
-        responses:
-          200:
-            description: "Service ticket details."
-            schema:
-              $ref: '#/definitions/ServiceTicket'
-          404:
-            description: "Service ticket not found."
+      
+      # Get, update, and delete a specific service ticket by ID
+      /service-tickets/{ticket_id}:
+        # Get a specific service ticket by ID
+        get:
+          tags:
+            - "Service Tickets"
+          summary: "Get a service ticket by ID"
+          description: "Retrieve a specific service ticket by its ID."
+          parameters:
+            - name: ticket_id
+              in: path
+              required: true
+              type: integer
+          responses:
+            200:
+              description: "Service ticket details."
+              schema:
+                $ref: '#/definitions/ServiceTicket'
+            404:
+              description: "Service ticket not found."
+      
       # Update a specific service ticket by ID
       put:
         tags:
@@ -451,6 +483,7 @@ paths:
               $ref: '#/definitions/ServiceTicket'
           404:
             description: "Service ticket not found."
+      
       # Delete a specific service ticket by ID
       delete:
         tags:
@@ -469,7 +502,7 @@ paths:
             description: "Service ticket not found."
     
     # Assign a product to a service ticket
-    /api/service-tickets/{ticket_id}/add_product:
+    /service-tickets/{ticket_id}/add_product:
       post:
         tags:
           - "Service Tickets"
@@ -498,7 +531,7 @@ paths:
             description: "Service ticket or products not found."
     
     # Get all service tickets for a specific mechanic or customer as authenticated user
-    /api/service-tickets/my-tickets:
+    /service-tickets/my-tickets:
       get:
         tags:
           - "Service Tickets"
@@ -516,7 +549,16 @@ paths:
           401:
             description: "Unauthorized. Token missing or invalid."
 
-definitions: 
+# ------------------------ Security Definitions -----------------------
+# Security definitions for authentication
+securityDefinitions:
+    BearerAuth:
+      type: "apiKey"
+      name: "Authorization"
+      in: "header"
+      description: "Bearer token for authentication. You must log in via the /auth/login to receive a token. Example: 'Bearer your.token.here'"
+
+definitions:
   # ------------------------ Login -------------------------
   LoginCredentials:
     type: object
@@ -526,7 +568,15 @@ definitions:
     properties:
       email:
         type: string
-        example: "john.doe@example.com"
+        example: "john.customer@example.com"
+        description: >
+          Use one of the test accounts below:
+          - Customer:
+            - Email: john.customer@example.com
+            - Password: password123
+          - Mechanic:
+            - Email: jane.mechanic@example.com
+            - Password: password123
       password:
         type: string
         example: "password123"
@@ -549,13 +599,14 @@ definitions:
       status:
         type: string
         example: "success"
-# ------------------------ Customers ------------------------
+  
+  # ------------------------ Customers ------------------------
   CustomerInput:
     type: object
     required:
       - name
       - email
-      - phone_number
+      - phone
       - password
     properties:
       name:
@@ -563,8 +614,8 @@ definitions:
         example: "John Doe"
       email:
         type: string
-        example: "john.doe@example.com"
-      phone_number:
+        example: "john.customer@example.com"
+      phone:
         type: string
         example: "555-555-5555"
       password:
@@ -577,7 +628,8 @@ definitions:
       - id
       - name
       - email
-      - phone_number
+      - phone
+      - password
     properties:
       id:
         type: integer
@@ -587,25 +639,27 @@ definitions:
         example: "John Doe"
       email:
         type: string
-        example: "john.doe@example.com"
+        example: "john.customer@example.com"
       phone_number:
         type: string
         example: "555-555-5555"
+
 # ------------------------ Mechanics -----------------------
   MechanicInput:
     type: object
     required:
       - name
       - email
-      - phone_number
+      - phone
       - password
+      - salary
     properties:
       name:
         type: string
         example: "Jane Smith"
       email:
         type: string
-        example: "jane.smith@example.com"
+        example: "jane.mechanic@example.com"
       phone_number:
         type: string
         example: "555-555-5555"
@@ -619,7 +673,8 @@ definitions:
       - id
       - name
       - email
-      - phone_number
+      - phone
+      - salary
     properties:
       id:
         type: integer
@@ -629,16 +684,16 @@ definitions:
         example: "Jane Smith"
       email:
         type: string
-        example: "jane.smith@example.com"
+        example: "jane.mechanic@example.com"
       phone_number:
         type: string
         example: "555-555-5555"
+
 # ------------------------ Inventory -----------------------
   InventoryInput:
     type: object
     required:
       - name
-      - quantity
       - price
     properties:
       name:
@@ -655,12 +710,11 @@ definitions:
         description: "Price of the part"
         example: 29.99
 
-  InventoryItem:
+  InventoryProduct:
     type: object
     required:
       - id
       - name
-      - quantity
       - price
     properties:
       id:
@@ -680,6 +734,7 @@ definitions:
         format: float
         description: "Price of the part"
         example: 29.99
+
 # ------------------------ Service Tickets -----------------------
   ServiceTicketInput:
     type: object
