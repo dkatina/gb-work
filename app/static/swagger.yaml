@@ -261,27 +261,27 @@ paths:
             description: "No mechanics found."
 
     # ------------------------ Inventory -----------------------
-    # Get all inventory items and create a new inventory item
+    # Get all inventory products and create a new inventory product
     /api/inventory:
-      # Get all inventory items
+      # Get all inventory products
       get:
         tags:
           - "Inventory"
-        summary: "Get all inventory items"
-        description: "Retrieve a list of all items in the inventory."
+        summary: "Get all inventory products"
+        description: "Retrieve a list of all products in the inventory."
         responses:
           200:
-            description: "A list of inventory items."
+            description: "A list of inventory products."
             schema:
               type: array
               items:
                 $ref: '#/definitions/InventoryItem'
-      # Create a new inventory item
+      # Create a new inventory product
       post:
         tags:
           - "Inventory"
-        summary: "Create a new inventory item"
-        description: "Add a new item to the inventory."
+        summary: "Create a new inventory product"
+        description: "Add a new product to the inventory."
         parameters:
           - in: body
             name: InventoryItem
@@ -290,17 +290,17 @@ paths:
               $ref: '#/definitions/InventoryInput'
         responses:
           201:
-            description: "Inventory Item created successfully."
+            description: "Inventory Product created successfully."
             schema:
               $ref: '#/definitions/InventoryItem'
-    # Get, update, and delete a specific Inventory Item by ID
+    # Get, update, and delete a specific Inventory Product by ID
     /api/inventory/{inventory_id}:
-      # Get a specific inventory item by ID
+      # Get a specific inventory product by ID
       get:
         tags:
           - "Inventory"
-        summary: "Get a inventory item by ID"
-        description: "Retrieve a specific inventory by its ID."
+        summary: "Get a Inventory Product by ID"
+        description: "Retrieve a specific inventory product by its ID."
         parameters:
           - name: inventory_id
             in: path
@@ -308,40 +308,40 @@ paths:
             type: integer
         responses:
           200:
-            description: "Inventory Item details."
+            description: "Inventory Product details."
             schema:
               $ref: '#/definitions/InventoryItem'
           404:
-            description: "Inventory Item not found."
-      # Update a specific Inventory Item by ID
+            description: "Inventory Product not found."
+      # Update a specific Inventory Product by ID
       put:
         tags:
           - "Inventory"
-        summary: "Update a Inventory Item"
-        description: "Update an existing Inventory Item's information."
+        summary: "Update a Inventory Product"
+        description: "Update an existing Inventory Product's information."
         parameters:
           - name: inventory_id
             in: path
             required: true
             type: integer
           - in: body
-            name: inventory_item
+            name: inventory_product
             required: true
             schema:
               $ref: '#/definitions/InventoryInput'
         responses:
           200:
-            description: "Inventory Item updated successfully."
+            description: "Inventory Product updated successfully."
             schema:
               $ref: '#/definitions/InventoryItem'
           404:
-            description: "Inventory Item not found."
-      # Delete a specific Inventory Item by ID
+            description: "Inventory Product not found."
+      # Delete a specific Inventory Product by ID
       delete:
         tags:
           - "Inventory"
-        summary: "Delete a Inventory Item"
-        description: "Remove a Inventory Item from the inventory."
+        summary: "Delete a Inventory Product"
+        description: "Remove a Inventory Product from the inventory."
         parameters:
           - name: inventory_id
             in: path
@@ -349,16 +349,16 @@ paths:
             type: integer
         responses:
           204:
-            description: "Inventory Item deleted successfully."
+            description: "Inventory Product deleted successfully."
           404:
-            description: "Inventory Item not found."
-    # Search inventory items by name
+            description: "Inventory Product not found."
+    # Search inventory products by name
     /api/inventory/search:
       get:
         tags:
           - "Inventory"
-        summary: "Search inventory items by name"
-        description: "Retrieve a list of inventory items matching the search criteria."
+        summary: "Search inventory products by name"
+        description: "Retrieve a list of inventory products matching the search criteria."
         parameters:
           - name: name
             in: query
@@ -367,14 +367,14 @@ paths:
             description: "Name of the part to search for."
         responses:
           200:
-            description: "A list of inventory items matching the search criteria."
+            description: "A list of inventory products matching the search criteria."
             schema:
               type: array
               items:
                 $ref: '#/definitions/InventoryItem'
           404:
-            description: "No inventory items found."
-    
+            description: "No inventory products found."
+
     # ------------------------ Service Tickets -----------------------
     # Get all service tickets and create a new service ticket
     /api/service-tickets:
@@ -468,20 +468,20 @@ paths:
           404:
             description: "Service ticket not found."
     
-    # Assign parts to a service ticket
-    /api/service-tickets/{ticket_id}/add_part:
+    # Assign a product to a service ticket
+    /api/service-tickets/{ticket_id}/add_product:
       post:
         tags:
           - "Service Tickets"
-        summary: "Assign parts to a service ticket"
-        description: "Assign parts to a specific service ticket."
+        summary: "Assign products to a service ticket"
+        description: "Assign products to a specific service ticket."
         parameters:
           - name: ticket_id
             in: path
             required: true
             type: integer
           - in: body
-            name: part_ids
+            name: product_ids
             required: true
             schema:
               type: object
@@ -493,9 +493,10 @@ paths:
                     example: [1, 2, 3]
         responses:
           200:
-            description: "Parts assigned successfully."
+            description: "Products assigned successfully."
           404:
-            description: "Service ticket or parts not found."
+            description: "Service ticket or products not found."
+    
     # Get all service tickets for a specific mechanic or customer as authenticated user
     /api/service-tickets/my-tickets:
       get:
@@ -684,7 +685,6 @@ definitions:
     type: object
     required:
       - customer_id
-      - mechanic_id
       - description
     properties:
       customer_id:
@@ -704,9 +704,7 @@ definitions:
     required:
       - id
       - customer_id
-      - mechanic_id
       - description
-      - status
     properties:
       id:
         type: integer
