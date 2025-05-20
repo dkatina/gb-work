@@ -1,6 +1,6 @@
 from app.blueprints.inventory import inventory_bp
-from app.blueprints.inventory.inventorySchemas import InventorySchema, inventorys_schema, inventory_schema
-from app.models import ServiceTicket, db, Inventory
+from app.blueprints.inventory.inventorySchemas import ProductSchema, products_schema, product_schema
+from app.models import Product, ServiceTicket, db, Product
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
@@ -12,10 +12,10 @@ from app.extensions import limiter, cache
 def create_inventory():
     try:
         data = request.get_json()
-        product = inventory_schema.load(data, session=db.session)
+        product = product_schema.load(data, session=db.session)
         db.session.add(product)
         db.session.commit()
-        return inventory_schema.jsonify(product), 201
+        return product_schema.jsonify(product), 201
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
@@ -25,7 +25,7 @@ def create_inventory():
 # Endpoint to GET ALL inventory products with validation error handling
 @inventory_bp.route('/', methods=['GET'], strict_slashes=False)
 #@cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
-def get_all_inventory():
+def get_all_products():
     try:
         page_str = request.args.get('page', '1')
         per_page_str = request.args.get('per_page', '10')
@@ -34,7 +34,8 @@ def get_all_inventory():
             page = int(page_str)
             per_page = int(per_page_str)
         except ValueError:
-            return jsonify({"current_page": page_str,
+            return jsonify({
+                "current_page": page_str,
                 "products": [],
                 "has_next": False,
                 "has_prev": False,
@@ -45,8 +46,8 @@ def get_all_inventory():
                 "error": "Page not found or exceeds total pages"
             }), 200
             
-        # Using .order_by() to ensure consisten pagination
-        base_query = Inventory.query.order_by(Inventory.id)
+        # Using Product model and  .order_by() to ensure consisten pagination
+        base_query = Product.query.order_by(Product.id)
         # Getting total number of inventory products
         total = base_query.count()
         # Calculating total pages
@@ -76,7 +77,7 @@ def get_all_inventory():
 
         return jsonify({
             "current_page": pagination.page,
-            "products": inventorys_schema.dump(products),
+            "products": products_schema.dump(products),
             "has_next": pagination.has_next,
             "has_prev": pagination.has_prev,
             "page": pagination.page,
@@ -90,12 +91,12 @@ def get_all_inventory():
 # Endpoint to GET a SPECIFIC inventory product by ID with validation error handling
 @inventory_bp.route('/<int:id>', methods=['GET'], strict_slashes=False)
 @cache.cached(timeout=60)  # Cache the response for 60 seconds to avoid repeated database calls
-def get_inventory(id):
+def get_product(id):
     try:
-        product = Inventory.query.get(id)
+        product = Product.query.get(id)
         if not product:
             return jsonify({"error": "Product not found"}), 404
-        return inventory_schema.jsonify(product), 200
+        return product_schema.jsonify(product), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
@@ -104,22 +105,24 @@ def get_inventory(id):
 # Endpoint to UPDATE an existing inventory product with validation error handling
 @inventory_bp.route('/<int:id>', methods=['PUT'], strict_slashes=False)
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")
-def update_inventory(id):
+def update_product(id):
     try:
-        print(f"Updating inventory product with ID: {id}")
-        # Fetching the inventory product by ID or raising a 404 error if not found
-        inventory_product = Inventory.query.get_or_404(id)
-        print(f"Found inventory product: {inventory_product}")
+        print(f"Updating product with ID: {id}")
+        # Fetching the product by ID or raising a 404 error if not found
+        product = Product.query.get_or_404(id)
+        print(f"Found product: {product}")
         # Getting data from the request body
         data = request.get_json()
         print(f"Data to update: {data}")
         # Loading the data into the schema for validation and updating
-        updated_inventory_product = inventory_schema.load(data, instance=inventory_product, session=db.session)
-        print(f"Updated inventory product: {updated_inventory_product}")
+        updated_product = product_schema.load(data, instance=product, session=db.session)
+        print(f"Updated product: {updated_product}")
+        
         # Committing the changes to the database
         db.session.commit()
-        # Returning the updated inventory product as a JSON response
-        return inventory_schema.jsonify(updated_inventory_product), 200
+        
+        # Returning the updated product as a JSON response
+        return product_schema.jsonify(updated_product), 200
     except ValidationError as err:
         return jsonify({"error": "Invalid input", "details": err.messages}), 400
     except Exception as e:
@@ -128,13 +131,15 @@ def update_inventory(id):
 # Endpoint to DELETE an inventory product by id with validation error handling
 @inventory_bp.route('/<int:id>', methods=['DELETE'], strict_slashes=False)
 @limiter.limit("2 per day")
-def delete_inventory(id):
+def delete_product(id):
     try:
-        inventory_product = Inventory.query.get(id)
-        if not inventory_product:
+        product = Product.query.get(id)
+        if not product:
             return jsonify({"error": "Product not found"}), 404
-        db.session.delete(inventory_product)
+        
+        db.session.delete(product)
         db.session.commit()
+        
         return jsonify({"message": "Inventory product deleted successfully"}), 200
     except ValidationError as err:
         return jsonify(err.messages), 400

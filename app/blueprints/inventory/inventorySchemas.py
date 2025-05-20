@@ -1,8 +1,8 @@
-from app.models import Inventory
+from app.models import Product, ProductServiceTicket
 from app.extensions import ma
 from marshmallow import fields, validate
 
-class InventorySchema(ma.SQLAlchemyAutoSchema):
+class ProductSchema(ma.SQLAlchemyAutoSchema):
     name = fields.String(
         required=True,
         validate=validate.Length(min=1, error="Name cannot be empty.")
@@ -13,10 +13,20 @@ class InventorySchema(ma.SQLAlchemyAutoSchema):
     )
     
     class Meta:
-        model = Inventory
+        model = Product
         load_instance = True
         include_fk = True
         
+class ProductServiceTicketSchema(ma.SQLAlchemyAutoSchema):
+    product = fields.Nested(ProductSchema)
+    quantity = fields.Int()
     
-inventory_schema = InventorySchema()
-inventorys_schema = InventorySchema(many=True)
+    class Meta:
+        model = ProductServiceTicket
+        load_instance = True
+        include_fk = True
+
+
+product_schema = ProductSchema()
+products_schema = ProductSchema(many=True)
+product_service_ticket_schema = ProductServiceTicketSchema()

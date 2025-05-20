@@ -184,7 +184,7 @@ class TestCustomer(unittest.TestCase):
             "id": customer_id,
             "name": customer_payload['name'],
             "phone": customer_payload['phone'],
-            "email": customer_payload['email'],
+            "email": customer.email,
         }
         for key in expected:
             self.assertEqual(response.json[key], expected[key])

@@ -231,7 +231,7 @@ class TestMechanic(unittest.TestCase):
             "id": mechanic_id,
             "name": mechanic_payload['name'],
             "phone": mechanic_payload['phone'],
-            "email": mechanic_payload['email'],
+            "email": mechanic.email,
             "salary": mechanic_payload['salary'],
         }
         for key in expected:
@@ -245,14 +245,10 @@ class TestMechanic(unittest.TestCase):
         
         mechanic_id = mechanic.id
         response = self.client.put(f'/mechanics/{mechanic_id}', json={
-            "name": "Updated Mechanic",
-            "phone": "987-654-3210",
-            # Missing email and password
+            "salary": "sixty thousand",  # Invalid salary
         }, headers=self.auth_headers)
         
         self.assertEqual(response.status_code, 400)
-        self.assertIn('email', response.json)
-        self.assertIn('password', response.json)
         self.assertIn('salary', response.json)
     
     

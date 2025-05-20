@@ -107,18 +107,19 @@ class ServiceTicket(db.Model):
     customer = relationship('Customer', back_populates='service_tickets', lazy=True)
     mechanics = relationship('Mechanic', secondary='service_mechanics', back_populates='service_tickets', lazy=True)
     
-    # Relationship with the Inventory class as many-to-many where one service ticket can have many inventory items and one inventory item can belong to many service tickets
-    inventory_items = relationship('Inventory', 
-                                secondary='inventory_service_tickets', 
-                                back_populates='service_tickets', 
-                                lazy=True, 
-                                primaryjoin='InventoryServiceTicket.service_ticket_id==ServiceTicket.id', 
-                                secondaryjoin='InventoryServiceTicket.inventory_id==Inventory.id',
-                                overlaps='inventory_links'
-                                )
-    inventory_links = relationship(
-        'InventoryServiceTicket', 
-        back_populates='service_ticket', 
+    # Relationship with the Product class as many-to-many where one service ticket can have many products and one product can belong to many service tickets
+    products = relationship(
+        'Product',
+        secondary='inventory_service_tickets',
+        back_populates='service_tickets',
+        lazy=True,
+        primaryjoin='ProductServiceTicket.service_ticket_id==ServiceTicket.id',
+        secondaryjoin='ProductServiceTicket.product_id==Product.id',
+        overlaps='product_links'
+    )
+    product_links = relationship(
+        'ProductServiceTicket',
+        back_populates='service_ticket',
         lazy=True
         )
     
@@ -130,9 +131,9 @@ class ServiceMechanic(db.Model):
     mechanic_id = Column(Integer, ForeignKey('mechanics.id'), primary_key=True)
     
 
-# Inventory class
+# Product class
 # This class represents the inventory table in the database
-class Inventory(db.Model):
+class Product(db.Model):
     __tablename__ = 'inventory'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
@@ -141,20 +142,20 @@ class Inventory(db.Model):
     # Relationship with the ServiceTicket class as many-to-many where one service ticket can have many inventory items and one inventory item can belong to many service tickets
     service_tickets = relationship('ServiceTicket',
                                 secondary='inventory_service_tickets',
-                                back_populates='inventory_items', 
+                                back_populates='products', 
                                 lazy=True,
-                                overlaps='inventory_links')
-    inventory_links = relationship('InventoryServiceTicket', back_populates='inventory', lazy=True)
+                                overlaps='product_links')
+    product_links = relationship('ProductServiceTicket', back_populates='product', lazy=True)
     
-# InventoryServiceTicket class junction table between Inventory and ServiceTicket
-# This class represents the inventory_service_tickets table in the database as a many-to-many relationship
-class InventoryServiceTicket(db.Model):
+# ProductServiceTicket class junction table between Product and ServiceTicket
+# This class represents the Product_service_tickets table in the database as a many-to-many relationship
+class ProductServiceTicket(db.Model):
     __tablename__ = 'inventory_service_tickets'
     id = Column(Integer, primary_key=True)
-    inventory_id = Column(Integer, ForeignKey('inventory.id'), nullable=False)
+    product_id = Column(Integer, ForeignKey('inventory.id'), nullable=False)
     service_ticket_id = Column(Integer, ForeignKey('service_tickets.id'), nullable=False)
     quantity = Column(Integer, nullable=False, default=1)  # Quantity of the inventory item used in the service ticket
-    
-    # Relationship with the Inventory class and ServiceTicket class
-    inventory = relationship('Inventory', back_populates='inventory_links', lazy=True, overlaps='inventory_items, service_tickets')
-    service_ticket = relationship('ServiceTicket', back_populates='inventory_links', lazy=True)
+
+    # Relationship with the Product class and ServiceTicket class
+    product = relationship('Product', back_populates='product_links', lazy=True, overlaps='service_tickets')
+    service_ticket = relationship('ServiceTicket', back_populates='product_links', lazy=True)

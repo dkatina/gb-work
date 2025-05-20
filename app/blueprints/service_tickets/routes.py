@@ -1,7 +1,8 @@
 from sqlalchemy import select
 from app.blueprints.service_tickets import service_tickets_bp
 from app.blueprints.service_tickets.service_ticketsSchemas import service_tickets_schema, service_ticket_schema, update_service_ticket_schema
-from app.models import Admin, Customer, Inventory, InventoryServiceTicket, Mechanic, db, ServiceTicket
+from app.models import Admin, Customer, Mechanic, Product, ProductServiceTicket, db, ServiceTicket
+from app.blueprints.inventory.inventorySchemas import product_service_ticket_schema
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
@@ -100,7 +101,7 @@ def get_service_tickets():
 
 # Endpoint to GET ALL service tickets for a specific customer or mechanic requiring authentication and uses validation error handling
 @service_tickets_bp.route('/my-tickets', methods=['GET'], strict_slashes=False)
-@limiter.limit("10 per minute; 20 per hour; 100 per day")
+#@limiter.limit("10 per minute; 20 per hour; 100 per day")
 @token_required
 def get_my_tickets(current_user):
     try:
@@ -187,43 +188,48 @@ def update_service_ticket(service_ticket_id):
 # Endpoint to Add a product to an existing service ticket with validation error handling
 @service_tickets_bp.route('/<int:service_ticket_id>/add_product', methods=['PUT'], strict_slashes=False)
 @limiter.limit("10 per minute; 20 per hour; 100 per day")
-def add_part_to_service_ticket(service_ticket_id):
+def add_product_to_service_ticket(service_ticket_id):
     try:
         # Get the data from the request body
         data = request.get_json()
-        if not data or 'inventory_id' not in data or 'quantity' not in data:
-            return jsonify({"error": "Missing inventory_id or quantity"}), 400
+        if not data or 'product_id' not in data or 'quantity' not in data:
+            return jsonify({"error": "Missing product_id or quantity"}), 400
         
-        # Get the service ticket and inventory item from the database
+        quantity = data['quantity']
+        if not isinstance(quantity, int) or quantity <= 0:
+            return jsonify({"error": "Quantity must be a positive number"}), 400
+        
+        # Get the service ticket and product item from the database
         service_ticket = ServiceTicket.query.get(service_ticket_id)
         if not service_ticket:
             return jsonify({"error": "Service ticket not found"}), 404
-        
-        inventory_item = Inventory.query.get(data.get('inventory_id'))
-        if not inventory_item:
-            return jsonify({"error": "Inventory item not found"}), 404
-    
-        # Check if the inventory item is already linked to the service ticket
-        existing_link = InventoryServiceTicket.query.filter_by(
+
+        product = Product.query.get(data['product_id'])
+        if not product:
+            return jsonify({"error": "Product item not found"}), 404
+
+        # Check if the product item is already linked to the service ticket
+        existing_link = ProductServiceTicket.query.filter_by(
             service_ticket_id=service_ticket.id,
-            inventory_id=inventory_item.id
+            product_id=product.id
         ).first()
+        
         if existing_link:
             return jsonify({"error": "This product is already linked to the service ticket"}), 400
 
-        # Create a new InventoryServiceTicket instance
-        inventory_service_ticket = InventoryServiceTicket(
-            inventory_id=inventory_item.id,
+        # Create a new ProductServiceTicket instance
+        product_service_ticket = ProductServiceTicket(
+            product_id=product.id,
             service_ticket_id=service_ticket.id,
-            quantity=data['quantity']
+            quantity=quantity
         )
         
-        db.session.add(inventory_service_ticket)
+        # Add the new product service ticket to the database
+        db.session.add(product_service_ticket)
         db.session.commit()
         
-        return jsonify({"message": "Product added successfully", 
-                        "inventory_service_ticket_id": inventory_service_ticket.id
-                        }), 201
+        return product_service_ticket_schema.jsonify(product_service_ticket), 201
+    
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:

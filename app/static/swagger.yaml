@@ -473,6 +473,8 @@ paths:
           - "Service Tickets"
         summary: "Delete a service ticket"
         description: "Remove a service ticket from the system."
+        security:
+          - BearerAuth: []
         parameters:
           - name: ticket_id
             in: path
@@ -489,29 +491,29 @@ paths:
       post:
         tags:
           - "Service Tickets"
-        summary: "Assign products to a service ticket"
-        description: "Assign products to a specific service ticket."
+        summary: "Assign a product to a service ticket"
+        description: "Assign a product with a quantity to a specific service ticket."
         parameters:
           - name: ticket_id
             in: path
             required: true
             type: integer
-          - in: body
-            name: product_ids
-            required: true
-            schema:
-              type: object
-              properties:
-                part_ids:
-                  type: array
-                  items:
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - product_id
+                  - quantity
+                properties:
+                  product_id:
                     type: integer
-                    example: [1, 2, 3]
-        responses:
-          200:
-            description: "Products assigned successfully."
-          404:
-            description: "Service ticket or products not found."
+                    example: 1
+                  quantity:
+                    type: integer
+                    example: 2
     
     # Get all service tickets for a specific mechanic or customer as authenticated user
     /service_tickets/my-tickets:
@@ -520,6 +522,8 @@ paths:
           - "Service Tickets"
         summary: "Get all service tickets for current user"
         description: "Retrieve a list of all service tickets assigned to the current user."
+        security:
+          - BearerAuth: []
         responses:
           200:
             description: "A list of service tickets for the authorized user, wheter they are a mechanic or customer."
