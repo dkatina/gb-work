@@ -111,6 +111,7 @@ def get_customer(id):
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")
 @token_required
 def update_customer(user, customer_id): # Receiving customer_id from the token
+    protected_emails = ['john.customer@example.com']
     try:
         customer = Customer.query.get_or_404(customer_id)
         
@@ -119,10 +120,18 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
             return jsonify({"error": "Unauthorized access"}), 403
         
         data = request.get_json()
+        
+        # Block password change for test accounts
+        if customer.email in protected_emails and 'password' in data:
+            print("Attempt to change password for test account") # Debugging line
+            return jsonify({"error": "This test account cannot change the password."}), 403
+        
         data.pop("email", None)  # Remove email from data if present
         customer_schema = CustomerSchema()
         customer = customer_schema.load(data, instance=customer, session=db.session)
+        
         db.session.commit()
+        
         return customer_schema.jsonify(customer), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
@@ -141,8 +150,14 @@ def delete_customer(user, customer_id): # Receiving customer_id from the token
         customer = Customer.query.get(customer_id)
         
         # Check if the customer_id in the token matches the customer_id in the URL
-        if getattr(user, 'user_type', None) != 'admin' and user.id != customer_id:
+        if user.user_type not in ['admin', 'customer']:
             return jsonify({"error": "Unauthorized access"}), 403
+        
+        if user.user_type == 'customer' and user.id != customer_id:
+            return jsonify({"error": "Customers can only delete their own accounts"}), 403
+
+        if not customer:
+            return jsonify({"error": "Customer not found."}), 404
 
         if customer.email in protected_emails:
             return jsonify({"error": "This test account cannot be deleted."}), 403

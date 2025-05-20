@@ -24,22 +24,30 @@ def token_required(f): # Decorator to require token for certain routes
     @wraps(f) # Preserve the original function's metadata
     def decorated(*args, **kwargs):
         token = None # Initialize token variable
-        '''
-        if is_testing_mode():
-            return f(None, *args, **kwargs)
-        '''
+        print("====== Incoming request ======") # Debugging line
+        print(f"Request Headers: {request.headers}") # Debugging line
+        
         if 'Authorization' in request.headers:
             token = request.headers['Authorization']
+            print(f"Token found: {token}") # Debugging line
             parts = token.split()
             if len(parts) == 2 and parts[0] == 'Bearer':
                 token = parts[1]
-        
-        if not token:
-            return jsonify({'error': 'Unauthorized'}), 401
+            else:
+                print("Invalid token format") # Debugging line
+                return jsonify({'error': 'Invalid token format Unauthorized'}), 401
+            
+        else:
+            print("Authorization header not found") # Debugging line
+            return jsonify({'error': 'Authorization header not found Unauthorized'}), 401
+
+        print(f"Decoded token: {token}")
         
         secret_key = current_app.config.get('SECRET_KEY', 'default_secret_key')
         try:
             data = jwt.decode(token, secret_key, algorithms=['HS256']) # Decode the token using the secret key and algorithm
+            print(f"Decoded data: {data}") # Debugging line
+            
             user_id = data['sub'] # Get the user ID from the decoded token
             user_type = data['user_type'] # Get the user type from the decoded token
             
@@ -51,15 +59,18 @@ def token_required(f): # Decorator to require token for certain routes
             elif user_type == 'admin':
                 user = Admin.query.get(user_id)
             else:
+                print(f"Invalid user type: {user_type} in token")
                 return jsonify({'error': 'Invalid user type!'}), 401
             
             if not user:
-                return jsonify({'error': 'Unauthorized'}), 401
+                print(f"User not found for ID: {user_id} and type: {user_type}")
+                return jsonify({'error': 'Token invalid or user not found'}), 401
 
             # Attaching the user_type to the user object
             user.user_type = user_type
             
         except jose.JWTError as e: # Handle JWT errors
+            print(f"JWT decode Error: {e}")
             return jsonify({'error': 'Unauthorized'}), 401
 
         return f(user, *args, **kwargs) # Call the original function with the user ID

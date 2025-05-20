@@ -137,6 +137,7 @@ def search_mechanics():
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")
 @token_required
 def update_mechanic(user, mechanic_id):
+    protected_emails = ["jane.mechanic@example.com"]
     try:
         mechanic = Mechanic.query.get_or_404(mechanic_id)
         
@@ -145,10 +146,18 @@ def update_mechanic(user, mechanic_id):
             return jsonify({"error": "Unauthorized access"}), 403
         
         data = request.get_json()
+        
+        # Block password change for test accounts
+        if mechanic.email in protected_emails and 'password' in data:
+            print("Attempt to change password for test account") # Debugging line
+            return jsonify({"error": "This test account cannot change the password."}), 403
+        
         data.pop("email", None)  # Remove email from data if present
         mechanic_schema = MechanicSchema()
         mechanic = mechanic_schema.load(data, instance=mechanic, session=db.session)
+        
         db.session.commit()
+        
         return mechanic_schema.jsonify(mechanic), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
@@ -164,12 +173,23 @@ def delete_mechanic(user, mechanic_id):
     protected_emails = ["jane.mechanic@example.com"]
     try:
         mechanic = Mechanic.query.get(mechanic_id)
+        
+        # Check if the mechanic_id in the token matches the mechanic_id in the URL
+        if user.user_type not in ['admin', 'mechanic']:
+            return jsonify({"error": "Unauthorized access"}), 403
+        
+        if user.user_type == 'mechanic' and user.id != mechanic_id:
+            return jsonify({"error": "Mechanics can only delete their own accounts"}), 403
+
         if not mechanic:
             return jsonify({"error": "Mechanic not found."}), 404
+        
         if mechanic.email in protected_emails:
             return jsonify({"error": "This test account cannot be deleted."}), 403
+        
         db.session.delete(mechanic)
         db.session.commit()
+        
         return jsonify({"message": f"Mechanic {mechanic_id} deleted successfully"}), 200
     except ValidationError as err:
         return jsonify(err.messages), 400

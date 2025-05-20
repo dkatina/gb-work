@@ -215,6 +215,8 @@ paths:
           - "Mechanics"
         summary: "Update a mechanic"
         description: "Update an existing mechanic's information. Email can not be updated due to being used as a unique identifier for the mechanic."
+        security:
+          - BearerAuth: []
         parameters:
           - name: mechanic_id
             in: path
@@ -238,6 +240,8 @@ paths:
           - "Mechanics"
         summary: "Delete a mechanic"
         description: "Remove a mechanic from the system."
+        security:
+          - BearerAuth: []
         parameters:
           - name: mechanic_id
             in: path
@@ -677,12 +681,16 @@ definitions:
       email:
         type: string
         example: "jane.mechanic@example.com"
-      phone_number:
+      phone:
         type: string
         example: "555-555-5555"
       password:
         type: string
         example: "password123"
+      salary:
+        type: number
+        format: float
+        example: 50000.00
 
   MechanicUpdateInput:
     type: object
@@ -695,12 +703,16 @@ definitions:
       name:
         type: string
         example: "Jane Smith"
-      phone_number:
+      phone:
         type: string
         example: "555-555-5555"
       password:
         type: string
         example: "password123"
+      salary:
+        type: number
+        format: float
+        example: 50000.00
 
   Mechanic:
     type: object
@@ -720,9 +732,13 @@ definitions:
       email:
         type: string
         example: "jane.mechanic@example.com"
-      phone_number:
+      phone:
         type: string
         example: "555-555-5555"
+      salary:
+        type: number
+        format: float
+        example: 50000.00
 
 # ------------------------ Inventory -----------------------
   InventoryInput:
