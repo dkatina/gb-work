@@ -14,7 +14,6 @@ class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
         model = ServiceTicket
         load_instance = True
         include_fk = True
-        fields = ('mechanic_ids', 'customer_id', 'service_date', 'vin', 'service_desc', 'inventory_items')
         
     def get_mechanic_ids(self, obj):
         return [mechanic.id for mechanic in obj.mechanics]

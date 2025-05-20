@@ -389,7 +389,7 @@ paths:
 
     # ------------------------ Service Tickets -----------------------
     # Get all service tickets and create a new service ticket
-    /service-tickets:
+    /service_tickets:
       # Get all service tickets
       get:
         tags:
@@ -423,7 +423,7 @@ paths:
               $ref: '#/definitions/ServiceTicket'
       
       # Get, update, and delete a specific service ticket by ID
-      /service-tickets/{ticket_id}:
+      /service_tickets/{ticket_id}:
         # Get a specific service ticket by ID
         get:
           tags:
@@ -485,7 +485,7 @@ paths:
             description: "Service ticket not found."
     
     # Assign a product to a service ticket
-    /service-tickets/{ticket_id}/add_product:
+    /service_tickets/{ticket_id}/add_product:
       post:
         tags:
           - "Service Tickets"
@@ -514,7 +514,7 @@ paths:
             description: "Service ticket or products not found."
     
     # Get all service tickets for a specific mechanic or customer as authenticated user
-    /service-tickets/my-tickets:
+    /service_tickets/my-tickets:
       get:
         tags:
           - "Service Tickets"
