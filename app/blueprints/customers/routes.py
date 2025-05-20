@@ -128,7 +128,7 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
         
         data.pop("email", None)  # Remove email from data if present
         customer_schema = CustomerSchema()
-        customer = customer_schema.load(data, instance=customer, session=db.session)
+        customer = customer_schema.load(data, instance=customer, session=db.session, partials=True)
         
         db.session.commit()
         

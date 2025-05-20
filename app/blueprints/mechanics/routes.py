@@ -154,7 +154,7 @@ def update_mechanic(user, mechanic_id):
         
         data.pop("email", None)  # Remove email from data if present
         mechanic_schema = MechanicSchema()
-        mechanic = mechanic_schema.load(data, instance=mechanic, session=db.session)
+        mechanic = mechanic_schema.load(data, instance=mechanic, session=db.session, partial=True)
         
         db.session.commit()
         

@@ -697,7 +697,6 @@ definitions:
     required:
       - name
       - phone
-      - password
       - salary
     properties:
       name:
