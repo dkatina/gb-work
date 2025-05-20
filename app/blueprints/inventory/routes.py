@@ -100,7 +100,7 @@ def get_inventory(id):
         return jsonify(err.messages), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
 # Endpoint to UPDATE an existing inventory product with validation error handling
 @inventory_bp.route('/<int:id>', methods=['PUT'], strict_slashes=False)
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")

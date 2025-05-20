@@ -386,29 +386,6 @@ paths:
             description: "Inventory Product deleted successfully."
           404:
             description: "Inventory Product not found."
-    
-    # Search inventory products by name
-    /inventory/search:
-      get:
-        tags:
-          - "Inventory"
-        summary: "Search inventory products by name"
-        description: "Retrieve a list of inventory products matching the search criteria."
-        parameters:
-          - name: name
-            in: query
-            required: true
-            type: string
-            description: "Name of the part to search for."
-        responses:
-          200:
-            description: "A list of inventory products matching the search criteria."
-            schema:
-              type: array
-              items:
-                $ref: '#/definitions/InventoryProduct'
-          404:
-            description: "No inventory products found."
 
     # ------------------------ Service Tickets -----------------------
     # Get all service tickets and create a new service ticket
@@ -750,10 +727,6 @@ definitions:
         type: string
         description: "Name of the part"
         example: "Brake Pad"
-      quantity:
-        type: integer
-        description: "Quantity of the part in stock or to be assigned to a service ticket"
-        example: 50
       price:
         type: number
         format: float
@@ -775,10 +748,6 @@ definitions:
         type: string
         description: "Name of the part"
         example: "Brake Pad"
-      quantity:
-        type: integer
-        description: "Quantity of the part in stock or to be assigned to a service ticket"
-        example: 50
       price:
         type: number
         format: float
