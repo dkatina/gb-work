@@ -161,10 +161,13 @@ def update_mechanic(user, mechanic_id):
 #@limiter.limit("2 per day")
 @token_required
 def delete_mechanic(user, mechanic_id):
+    protected_emails = ["jane.mechanic@example.com"]
     try:
         mechanic = Mechanic.query.get(mechanic_id)
         if not mechanic:
             return jsonify({"error": "Mechanic not found."}), 404
+        if mechanic.email in protected_emails:
+            return jsonify({"error": "This test account cannot be deleted."}), 403
         db.session.delete(mechanic)
         db.session.commit()
         return jsonify({"message": f"Mechanic {mechanic_id} deleted successfully"}), 200

@@ -136,6 +136,7 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
 #@limiter.limit("2 per day")
 @token_required
 def delete_customer(user, customer_id): # Receiving customer_id from the token
+    protected_emails = ['john.customer@example.com']
     try:
         customer = Customer.query.get(customer_id)
         
@@ -143,6 +144,9 @@ def delete_customer(user, customer_id): # Receiving customer_id from the token
         if getattr(user, 'user_type', None) != 'admin' and user.id != customer_id:
             return jsonify({"error": "Unauthorized access"}), 403
 
+        if customer.email in protected_emails:
+            return jsonify({"error": "This test account cannot be deleted."}), 403
+        
         if not customer:
             return jsonify({"error": "Customer not found."}), 404
 
