@@ -228,7 +228,11 @@ def add_product_to_service_ticket(service_ticket_id):
         db.session.add(product_service_ticket)
         db.session.commit()
         
-        return product_service_ticket_schema.jsonify(product_service_ticket), 201
+        return jsonify({
+            "message": "Product added successfully",
+            "product_service_ticket_id": product_service_ticket.id,
+            "product": product_service_ticket_schema.dump(product_service_ticket)
+        }), 201
     
     except ValidationError as err:
         return jsonify(err.messages), 400

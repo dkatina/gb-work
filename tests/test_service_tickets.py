@@ -1,7 +1,7 @@
 import uuid
 from flask import jsonify, request
 from app import create_app
-from app.models import Inventory, db, Mechanic, Admin, ServiceTicket, Customer
+from app.models import Product, db, Mechanic, Admin, ServiceTicket, Customer
 import unittest
 from app.config import TestingConfig
 from app.utils.util import not_found
@@ -293,7 +293,7 @@ class TestServiceTicket(unittest.TestCase):
         # Attempt to get all service tickets for a non-existent customer
         response = self.client.get('/service_tickets/my-tickets/', headers=self.auth_headers)
         self.assertEqual(response.status_code, 401)
-        self.assertIn('Unauthorized', response.get_json().get('error', ''))
+        self.assertIn('Token invalid or user not found', response.get_json().get('error', ''))
         
 
     # ---------------------- Test Invalid Get All Service Tickets for Specific Mechanic ----------------------
@@ -327,8 +327,7 @@ class TestServiceTicket(unittest.TestCase):
         response = self.client.get('/service_tickets/my-tickets/', headers=self.auth_headers)
 
         self.assertEqual(response.status_code, 401)
-        self.assertIn('Unauthorized', response.get_json().get('error', ''))
-        
+        self.assertIn('Token invalid or user not found', response.get_json().get('error', ''))
 
 
     # ---------------------- Test Get Service Ticket by ID ----------------------
@@ -447,7 +446,7 @@ class TestServiceTicket(unittest.TestCase):
         service_ticket_id = response.json.get('service_ticket_id')
 
         # Create a test product
-        test_product = Inventory(
+        test_product = Product(
             name="Test product",
             price=100.00,
             )
@@ -456,7 +455,7 @@ class TestServiceTicket(unittest.TestCase):
         
         # Add a part to the service ticket
         response = self.client.put(f'/service_tickets/{service_ticket_id}/add_product/', json={
-            "inventory_id": test_product.id,
+            "product_id": test_product.id,
             "quantity": 1
         }, headers=self.auth_headers)
         
@@ -468,7 +467,7 @@ class TestServiceTicket(unittest.TestCase):
     # ---------------------- Test Invalid Adding Product to Service Ticket using PUT ----------------------
     def test_invalid_add_product_to_service_ticket(self):
         # Create a test product
-        test_product = Inventory(
+        test_product = Product(
             name="Product Test",
             price=150.00,
             )
@@ -477,7 +476,7 @@ class TestServiceTicket(unittest.TestCase):
         
         # Attempt to add a product to a service ticket with a non-existent ID
         response = self.client.put('/service_tickets/99999999/add_product/', json={
-            "inventory_id": test_product.id,
+            "product_id": test_product.id,
             "quantity": 1
         }, headers=self.auth_headers)
         
