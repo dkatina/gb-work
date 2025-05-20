@@ -422,27 +422,27 @@ paths:
             schema:
               $ref: '#/definitions/ServiceTicket'
       
-      # Get, update, and delete a specific service ticket by ID
-      /service_tickets/{ticket_id}:
-        # Get a specific service ticket by ID
-        get:
-          tags:
-            - "Service Tickets"
-          summary: "Get a service ticket by ID"
-          description: "Retrieve a specific service ticket by its ID."
-          parameters:
-            - name: ticket_id
-              in: path
-              required: true
-              type: integer
-          responses:
-            200:
-              description: "Service ticket details."
-              schema:
-                $ref: '#/definitions/ServiceTicket'
-            404:
-              description: "Service ticket not found."
-      
+    # Get, update, and delete a specific service ticket by ID
+    /service_tickets/{ticket_id}:
+      # Get a specific service ticket by ID
+      get:
+        tags:
+          - "Service Tickets"
+        summary: "Get a service ticket by ID"
+        description: "Retrieve a specific service ticket by its ID."
+        parameters:
+          - name: ticket_id
+            in: path
+            required: true
+            type: integer
+        responses:
+          200:
+            description: "Service ticket details."
+            schema:
+              $ref: '#/definitions/ServiceTicket'
+          404:
+            description: "Service ticket not found."
+    
       # Update a specific service ticket by ID
       put:
         tags:
@@ -458,7 +458,7 @@ paths:
             name: service_ticket
             required: true
             schema:
-              $ref: '#/definitions/ServiceTicketInput'
+              $ref: '#/definitions/ServiceTicketUpdateInput'
         responses:
           200:
             description: "Service ticket updated successfully."
@@ -759,26 +759,32 @@ definitions:
     type: object
     required:
       - customer_id
-      - description
+      - service_desc
     properties:
       customer_id:
         type: integer
         example: 1
+      vin:
+        type: string
+        example: "1HGCM82633A123456"
+      service_desc:
+        type: string
+        example: "Oil change and tire rotation"
       mechanic_ids:
         type: array
         items:
           type: integer
-          example: [1, 2]
-      description:
-        type: string
-        example: "Oil change and tire rotation"
+        example: [1, 2]
+      
 
   ServiceTicket:
     type: object
     required:
       - id
       - customer_id
-      - description
+      - vin
+      - service_desc
+      - mechanic_ids
     properties:
       id:
         type: integer
@@ -786,10 +792,37 @@ definitions:
       customer_id:
         type: integer
         example: 1
-      mechanic_id:
-        type: integer
-        example: 1
-      description:
+      service_desc:
         type: string
         example: "Oil change and tire rotation"
+      mechanic_ids:
+        type: array
+        items:
+          type: integer
+        example: [1, 2]
+      
 
+  ServiceTicketUpdateInput:
+      type: object
+      required:
+        - vin
+        - service_desc
+        - add_mechanic_ids
+        - remove_mechanic_ids
+      properties:
+        vin:
+          type: string
+          example: "1HGCM82633A123456"
+        service_desc:
+          type: string
+          example: "Oil change and tire rotation"
+        add_mechanic_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2]
+        remove_mechanic_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2]

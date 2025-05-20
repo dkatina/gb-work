@@ -28,6 +28,7 @@ def create_service_ticket():
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
+        print("Create Service Ticket Error:", e)  # Debugging line
         return jsonify({"error": str(e)}), 500
 
 
@@ -140,7 +141,7 @@ def get_service_ticket(service_ticket_id):
 
 # Endpoint to UPDATE an existing service ticket with validation error handling
 @service_tickets_bp.route('/<int:service_ticket_id>', methods=['PUT'], strict_slashes=False)
-@limiter.limit("10 per minute; 20 per hour; 100 per day")
+#@limiter.limit("10 per minute; 20 per hour; 100 per day")
 def update_service_ticket(service_ticket_id):
     try:
         service_ticket_update = update_service_ticket_schema.load(request.json, partial=True)
