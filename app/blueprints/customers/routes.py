@@ -119,6 +119,7 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
             return jsonify({"error": "Unauthorized access"}), 403
         
         data = request.get_json()
+        data.pop("email", None)  # Remove email from data if present
         customer_schema = CustomerSchema()
         customer = customer_schema.load(data, instance=customer, session=db.session)
         db.session.commit()
@@ -128,8 +129,6 @@ def update_customer(user, customer_id): # Receiving customer_id from the token
     except Exception as e:
         print("Update Customer Exception:", e) # Debugging line
         return jsonify({"error": str(e)}), 500
-
-
 
 
 # Endpoint to DELETE a customer with validation error handling and requires token authentication

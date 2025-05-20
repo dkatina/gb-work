@@ -112,7 +112,7 @@ paths:
         tags:
           - "Customers"
         summary: "Update a customer"
-        description: "Update an existing customer's information."
+        description: "Update an existing customer's information. Email can not be updated due to being used as a unique identifier for the customer."
         security:
           - BearerAuth: []
         parameters:
@@ -124,7 +124,7 @@ paths:
             name: customer
             required: true
             schema:
-              $ref: '#/definitions/CustomerInput'
+              $ref: '#/definitions/CustomerUpdateInput'
         responses:
           200:
             description: "Customer updated successfully."
@@ -139,6 +139,8 @@ paths:
           - "Customers"
         summary: "Delete a customer"
         description: "Remove a customer from the system."
+        security:
+          - BearerAuth: []
         parameters:
           - name: customer_id
             in: path
@@ -148,7 +150,7 @@ paths:
           204:
             description: "Customer deleted successfully."
           403:
-            description: "Unauthorized access"
+            description: "Unauthorized"
           404:
             description: "Customer not found."
 
@@ -212,7 +214,7 @@ paths:
         tags:
           - "Mechanics"
         summary: "Update a mechanic"
-        description: "Update an existing mechanic's information."
+        description: "Update an existing mechanic's information. Email can not be updated due to being used as a unique identifier for the mechanic."
         parameters:
           - name: mechanic_id
             in: path
@@ -222,7 +224,7 @@ paths:
             name: mechanic
             required: true
             schema:
-              $ref: '#/definitions/MechanicInput'
+              $ref: '#/definitions/MechanicUpdateInput'
         responses:
           200:
             description: "Mechanic updated successfully."
@@ -605,7 +607,6 @@ definitions:
     type: object
     required:
       - name
-      - email
       - phone
       - password
     properties:
@@ -615,6 +616,23 @@ definitions:
       email:
         type: string
         example: "john.customer@example.com"
+      phone:
+        type: string
+        example: "555-555-5555"
+      password:
+        type: string
+        example: "password123"
+
+  CustomerUpdateInput:
+    type: object
+    required:
+      - name
+      - phone
+      - password
+    properties:
+      name:
+        type: string
+        example: "John Doe"
       phone:
         type: string
         example: "555-555-5555"
@@ -649,7 +667,6 @@ definitions:
     type: object
     required:
       - name
-      - email
       - phone
       - password
       - salary
@@ -660,6 +677,24 @@ definitions:
       email:
         type: string
         example: "jane.mechanic@example.com"
+      phone_number:
+        type: string
+        example: "555-555-5555"
+      password:
+        type: string
+        example: "password123"
+
+  MechanicUpdateInput:
+    type: object
+    required:
+      - name
+      - phone
+      - password
+      - salary
+    properties:
+      name:
+        type: string
+        example: "Jane Smith"
       phone_number:
         type: string
         example: "555-555-5555"

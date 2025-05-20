@@ -145,6 +145,7 @@ def update_mechanic(user, mechanic_id):
             return jsonify({"error": "Unauthorized access"}), 403
         
         data = request.get_json()
+        data.pop("email", None)  # Remove email from data if present
         mechanic_schema = MechanicSchema()
         mechanic = mechanic_schema.load(data, instance=mechanic, session=db.session)
         db.session.commit()
