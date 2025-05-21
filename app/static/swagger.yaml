@@ -559,14 +559,14 @@ definitions:
     properties:
       email:
         type: string
-        example: "john.customer@example.com"
+        example: "test.customer@example.com"
         description: >
           Use one of the test accounts below:
           - Customer:
-            - Email: john.customer@example.com
+            - Email: test.customer@example.com
             - Password: password123
           - Mechanic:
-            - Email: jane.mechanic@example.com
+            - Email: test.mechanic@example.com
             - Password: password123
       password:
         type: string
@@ -601,10 +601,10 @@ definitions:
     properties:
       name:
         type: string
-        example: "John Doe"
+        example: "Test Customer"
       email:
         type: string
-        example: "john.customer@example.com"
+        example: "test.customer@example.com"
       phone:
         type: string
         example: "555-555-5555"
@@ -621,7 +621,7 @@ definitions:
     properties:
       name:
         type: string
-        example: "John Doe"
+        example: "Test Customer"
       phone:
         type: string
         example: "555-555-5555"
@@ -643,10 +643,10 @@ definitions:
         example: 1
       name:
         type: string
-        example: "John Doe"
+        example: "Test Customer"
       email:
         type: string
-        example: "john.customer@example.com"
+        example: "test.customer@example.com"
       phone_number:
         type: string
         example: "555-555-5555"
@@ -662,10 +662,10 @@ definitions:
     properties:
       name:
         type: string
-        example: "Jane Smith"
+        example: "Test Mechanic"
       email:
         type: string
-        example: "jane.mechanic@example.com"
+        example: "test.mechanic@example.com"
       phone:
         type: string
         example: "555-555-5555"
@@ -686,7 +686,7 @@ definitions:
     properties:
       name:
         type: string
-        example: "Jane Smith"
+        example: "Test Mechanic"
       phone:
         type: string
         example: "555-555-5555"
@@ -712,10 +712,10 @@ definitions:
         example: 1
       name:
         type: string
-        example: "Jane Smith"
+        example: "Test Mechanic"
       email:
         type: string
-        example: "jane.mechanic@example.com"
+        example: "test.mechanic@example.com"
       phone:
         type: string
         example: "555-555-5555"
