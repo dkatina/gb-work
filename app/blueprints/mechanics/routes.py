@@ -137,7 +137,7 @@ def search_mechanics():
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")
 @token_required
 def update_mechanic(user, mechanic_id):
-    protected_emails = ["jane.mechanic@example.com"]
+    protected_emails = ["test.mechanic@example.com"]
     try:
         mechanic = Mechanic.query.get_or_404(mechanic_id)
         

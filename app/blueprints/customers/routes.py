@@ -111,7 +111,7 @@ def get_customer(id):
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")
 @token_required
 def update_customer(user, customer_id): # Receiving customer_id from the token
-    protected_emails = ['john.customer@example.com']
+    protected_emails = ['test.customer@example.com']
     try:
         customer = Customer.query.get_or_404(customer_id)
         
