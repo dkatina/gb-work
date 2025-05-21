@@ -1,3 +1,4 @@
+from app.utils.util import token_required
 from app.blueprints.inventory import inventory_bp
 from app.blueprints.inventory.inventorySchemas import ProductSchema, products_schema, product_schema
 from app.models import Product, ServiceTicket, db, Product
@@ -105,8 +106,12 @@ def get_product(id):
 # Endpoint to UPDATE an existing inventory product with validation error handling
 @inventory_bp.route('/<int:id>', methods=['PUT'], strict_slashes=False)
 #@limiter.limit("10 per minute; 20 per hour; 100 per day")
-def update_product(id):
+@token_required
+def update_product(user, id):
     try:
+        if user.user_type not in ['admin', 'mechanic']:
+            return jsonify({"error": "Unauthorized access: Only mechanics or admins can update products"}), 403
+        
         print(f"Updating product with ID: {id}")
         # Fetching the product by ID or raising a 404 error if not found
         product = Product.query.get_or_404(id)
@@ -131,16 +136,20 @@ def update_product(id):
 # Endpoint to DELETE an inventory product by id with validation error handling
 @inventory_bp.route('/<int:id>', methods=['DELETE'], strict_slashes=False)
 @limiter.limit("2 per day")
-def delete_product(id):
+@token_required
+def delete_product(user, id):
     try:
+        if user.user_type not in ['admin', 'mechanic']:
+            return jsonify({"error": "Unauthorized access: Only mechanics or admins can delete products"}), 403
+        
         product = Product.query.get(id)
         if not product:
             return jsonify({"error": "Product not found"}), 404
         
         db.session.delete(product)
         db.session.commit()
-        
-        return jsonify({"message": "Inventory product deleted successfully"}), 200
+
+        return jsonify({"message": "Product deleted successfully from inventory"}), 200
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:

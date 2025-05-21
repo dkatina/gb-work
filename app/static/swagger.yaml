@@ -325,67 +325,69 @@ paths:
             schema:
               $ref: '#/definitions/InventoryProduct'
     
-    # Get, update, and delete a specific Inventory Product by ID
-    /inventory/{inventory_id}:
-      # Get a specific inventory product by ID
+    # Get, update, and delete a specific Product by ID
+    /inventory/{product_id}:
+      # Get a specific product by ID
       get:
         tags:
           - "Inventory"
-        summary: "Get a Inventory Product by ID"
-        description: "Retrieve a specific inventory product by its ID."
+        summary: "Get a Product by ID"
+        description: "Retrieve a specific product by its ID."
         parameters:
-          - name: inventory_id
+          - name: product_id
             in: path
             required: true
             type: integer
         responses:
           200:
-            description: "Inventory Product details."
+            description: "Product details."
             schema:
               $ref: '#/definitions/InventoryProduct'
           404:
-            description: "Inventory Product not found."
+            description: "Product not found."
       
       # Update a specific Inventory Product by ID
       put:
         tags:
           - "Inventory"
-        summary: "Update a Inventory Product"
-        description: "Update an existing Inventory Product's information."
+        summary: "Update a Product in Inventory"
+        description: "Update an existing Product's information."
         parameters:
-          - name: inventory_id
+          - name: product_id
             in: path
             required: true
             type: integer
           - in: body
-            name: inventory_product
+            name: product
             required: true
             schema:
               $ref: '#/definitions/InventoryInput'
         responses:
           200:
-            description: "Inventory Product updated successfully."
+            description: "Product updated successfully."
             schema:
               $ref: '#/definitions/InventoryProduct'
           404:
-            description: "Inventory Product not found."
+            description: "Product not found."
       
       # Delete a specific Inventory Product by ID
       delete:
         tags:
           - "Inventory"
-        summary: "Delete a Inventory Product"
-        description: "Remove a Inventory Product from the inventory."
+        summary: "Delete a Product from Inventory"
+        description: "Remove a Product from the inventory."
+        security:
+          - BearerAuth: []
         parameters:
-          - name: inventory_id
+          - name: product_id
             in: path
             required: true
             type: integer
         responses:
-          204:
-            description: "Inventory Product deleted successfully."
+          200:
+            description: "Product deleted successfully from inventory."
           404:
-            description: "Inventory Product not found."
+            description: "Product not found."
 
     # ------------------------ Service Tickets -----------------------
     # Get all service tickets and create a new service ticket

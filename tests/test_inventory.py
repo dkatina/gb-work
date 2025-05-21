@@ -1,7 +1,7 @@
 import uuid
 from flask import jsonify, request
 from app import create_app
-from app.models import Inventory, db, Mechanic, Admin, ServiceTicket, Customer
+from app.models import Product, db, Mechanic, Admin, ServiceTicket, Customer
 import unittest
 from app.config import TestingConfig
 from app.utils.util import not_found
@@ -213,7 +213,7 @@ class TestServiceTicket(unittest.TestCase):
 # ------------------------------ Test Delete Inventory Product ------------------------------
     def test_delete_inventory_product(self):
         # Creating a product to delete
-        new_product = Inventory(name="Product to Delete", price=10.99)
+        new_product = Product(name="Product to Delete", price=10.99)
         db.session.add(new_product)
         db.session.commit()
 
@@ -222,7 +222,7 @@ class TestServiceTicket(unittest.TestCase):
 
         data = response.get_json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data.get('message'), 'Inventory product deleted successfully')
+        self.assertEqual(data.get('message'), 'Product deleted successfully from inventory')
 
     
 # ------------------------------ Test Invalid Delete Inventory Product ------------------------------
