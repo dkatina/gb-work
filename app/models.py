@@ -157,5 +157,14 @@ class ProductServiceTicket(db.Model):
     quantity = Column(Integer, nullable=False, default=1)  # Quantity of the inventory item used in the service ticket
 
     # Relationship with the Product class and ServiceTicket class
-    product = relationship('Product', back_populates='product_links', lazy=True, overlaps='service_tickets')
-    service_ticket = relationship('ServiceTicket', back_populates='product_links', lazy=True)
+    product = relationship(
+        'Product', 
+        back_populates='product_links', 
+        lazy=True, 
+        overlaps='service_tickets')
+    
+    service_ticket = relationship(
+        'ServiceTicket', 
+        back_populates='product_links', 
+        lazy=True,
+        overlaps='products')

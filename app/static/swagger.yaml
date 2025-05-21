@@ -352,6 +352,8 @@ paths:
           - "Inventory"
         summary: "Update a Product in Inventory"
         description: "Update an existing Product's information."
+        security:
+          - BearerAuth: []
         parameters:
           - name: product_id
             in: path
