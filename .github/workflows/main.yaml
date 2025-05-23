@@ -35,7 +35,7 @@ jobs:
       - name: Compile updated requirements
         run: |
           source venv/bin/activate
-          pip-compile requirements.in --output-file requirements.txt
+          pip-compile requirements.in --output-file=requirements.txt
 
       - name: Check if requirements.txt is updated
         run: |
