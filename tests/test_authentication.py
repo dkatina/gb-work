@@ -1,7 +1,7 @@
 from app import create_app, db
 from app.models import Customer, Mechanic
 import unittest
-from app.config import TestingConfig
+from app.config import config_by_name
 
 # python -m unittest discover tests -v
 # python -m unittest tests.test_authentication -v

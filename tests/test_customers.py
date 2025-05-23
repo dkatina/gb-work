@@ -11,13 +11,13 @@ from app.config import TestingConfig
 class TestCustomer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.app = create_app(TestingConfig)
-        cls.app_context = cls.app.app_context()
-        cls.app_context.push()
-        
+        cls.app = create_app('testing')
         cls.client = cls.app.test_client()
-        db.create_all()
-        
+
+        # Create an application context
+        with cls.app.app_context():
+            db.create_all()
+    
         # Creating a test admin for all tests
         # This admin will be used for authentication in the tests
         admin = Admin(
@@ -30,9 +30,9 @@ class TestCustomer(unittest.TestCase):
     
     @classmethod
     def tearDownClass(cls):
-        db.session.remove()
-        db.drop_all()
-        cls.app_context.pop()
+        with cls.app.app_context():
+            db.session.remove()
+            db.drop_all()
     
     @staticmethod
     def short_uuid():
