@@ -1,7 +1,8 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from app.blueprints.customers import customers_bp
 from app.blueprints.customers.customersSchemas import CustomerSchema, customers_schema
-from app.models import db, Customer, Admin
+from app.models import ServiceTicket, db, Customer, Admin
 from flask import jsonify, request
 from marshmallow import ValidationError
 from app.extensions import limiter, cache
@@ -164,10 +165,25 @@ def delete_customer(user, customer_id): # Receiving customer_id from the token
         
         if not customer:
             return jsonify({"error": "Customer not found."}), 404
-
+        
+        # Update related service tickets to remove the customer_id
+        service_tickets = ServiceTicket.query.filter_by(customer_id=customer_id).all()
+        for ticket in service_tickets:
+            ticket.customer_id = None
+            db.session.add(ticket)
+        
+        # Commit the changes to the service tickets
+        db.session.commit()
+        
+        # Delete the customer
         db.session.delete(customer)
         db.session.commit()
+        
         return jsonify({"message": f"Customer {customer_id} deleted successfully"}), 200
+    
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "Cannot delete customer with existing service tickets."}), 400
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:

@@ -492,7 +492,7 @@ paths:
     
     # Assign a product to a service ticket
     /service_tickets/{ticket_id}/add_product:
-      post:
+      put:
         tags:
           - "Service Tickets"
         summary: "Assign a product to a service ticket"
@@ -502,23 +502,67 @@ paths:
             in: path
             required: true
             type: integer
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - product_id
-                  - quantity
-                properties:
-                  product_id:
-                    type: integer
-                    example: 1
-                  quantity:
-                    type: integer
-                    example: 2
-    
+          - in: body
+            name: service_ticket_add_product
+            required: true
+            schema:
+              $ref: '#/definitions/ServiceTicketAddProductInput'
+        responses:
+          201:
+            description: "Product successfully added to the service ticket"
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Product added successfully"
+                product_service_ticket_id:
+                  type: integer
+                  example: 1
+                product:
+                  type: object
+                  properties:
+                    product_id:
+                      type: integer
+                      example: 1
+                    product_name:
+                      type: string
+                      example: "Motor oil"
+                    quantity:
+                      type: integer
+                      example: 2
+          400:
+            description: "Invalid input data"
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: "Missing product_id or quantity"
+          404:
+            description: "Service ticket or product not found."
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: "Service ticket or product not found."
+          500:
+            description: "Internal server error"
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: "Unexpected error"
+
+
     # Get all service tickets for a specific mechanic or customer as authenticated user
     /service_tickets/my-tickets:
       get:
@@ -834,3 +878,16 @@ definitions:
           items:
             type: integer
           example: [1, 2]
+
+  ServiceTicketAddProductInput:
+    type: object
+    required:
+      - product_id
+      - quantity
+    properties:
+      product_id:
+        type: integer
+        example: 1
+      quantity:
+        type: integer
+        example: 2
