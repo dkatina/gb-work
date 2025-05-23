@@ -27,15 +27,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install pip-tools
       
-      - name: Install dependencies
-        run: |
-          source venv/bin/activate
-          pip install -r requirements.txt
-
       - name: Compile updated requirements
         run: |
           source venv/bin/activate
           pip-compile requirements.in --output-file=requirements.txt
+
+      - name: Install dependencies
+        run: |
+          source venv/bin/activate
+          pip install -r requirements.txt
 
       - name: Check if requirements.txt is updated
         run: |
