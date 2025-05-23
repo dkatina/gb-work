@@ -6,7 +6,7 @@ click==8.1.8
 colorama==0.4.6
 Deprecated==1.2.18
 ecdsa==0.19.1
-Flask==3.1.0
+Flask==2.0,<3.0
 Flask-Caching==2.3.1
 Flask-Limiter==3.12
 flask-marshmallow==1.3.0
