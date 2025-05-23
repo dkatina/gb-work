@@ -52,6 +52,12 @@ jobs:
           git diff --quiet --exit-code || git commit -m "Update requirements.txt with new versions."
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}  # Using the token to authenticate
 
+      - name: Upload requirements.txt
+        uses: actions/upload-artifact@v2
+        with:
+          name: requirements.txt
+          path: requirements.txt
+
       - name: Print debugging information
         run: |
           echo "Python version: $(python --version)"
@@ -79,16 +85,10 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install pip-tools
-        run: |
-          source venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install pip-tools
-
-      - name: Compile updated requirements (in test job)
-        run: |
-          source venv/bin/activate
-          pip-compile requirements.in --output-file=requirements.txt
+      - name: Download requirements.txt
+        uses: actions/download-artifact@v2
+        with:
+          name: requirements.txt
 
       - name: Install dependencies
         run: |
