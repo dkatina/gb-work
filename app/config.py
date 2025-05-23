@@ -13,8 +13,8 @@ class CommonConfig:
 
 class BaseConfig(CommonConfig):
     # Only fetching DB_USER and DB_PASSWORD from .env file for non testing environments
-    DB_USER = os.getenv('DB_USER') if not os.getenv('FLASK_ENV') == 'testing' else 'root'
-    DB_PASSWORD = os.getenv('DB_PASSWORD') if not os.getenv('FLASK_ENV') == 'testing' else ''
+    DB_USER = getenv('DB_USER') if not os.getenv('FLASK_ENV') == 'testing' else 'root'
+    DB_PASSWORD = getenv('DB_PASSWORD') if not os.getenv('FLASK_ENV') == 'testing' else ''
 
     # If DB_USER and DB_PASSWORD is not set and it is not testing environment, raise an error
     if not DB_USER or not DB_PASSWORD:
