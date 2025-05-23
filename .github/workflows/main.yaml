@@ -15,16 +15,39 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-      
+
       - name: Create virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
 
+      - name: Install pip-tools
+        run: |
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install pip-tools
+      
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          source venv/bin/activate
           pip install -r requirements.txt
+
+      - name: Compile updated requirements
+        run: |
+          source venv/bin/activate
+          pip-compile requirements.in --output-file requirements.txt
+
+      - name: Check if requirements.txt is updated
+        run: |
+          git diff --exit-code requirements.txt || echo "requirements.txt has been updated"
+
+      - name: Commit and push updated requirements.txt
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "github-actions@github.com"
+          git add requirements.txt
+          git diff --quiet --exit-code || git commit -m "Update requirements.txt with new versions."
+          git push origin main
 
       - name: Print debugging information
         run: |
