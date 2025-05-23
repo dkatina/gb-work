@@ -1,17 +1,16 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
-from sqlalchemy.orm import relationship, DeclarativeBase
+from sqlalchemy.orm import relationship, declarative_base
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
-class Base(DeclarativeBase):
-    pass
-
+Base = declarative_base()
 db = SQLAlchemy(model_class=Base)
 
 # Creating the database tables
 # Admin model
-class Admin(db.Model):
+class Admin(Base):
+    __tablename__ = 'admins'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     email = Column(String(50), nullable=False, unique=True)
@@ -26,7 +25,7 @@ class Admin(db.Model):
 
 # Customer class
 # This class represents the customers table in the database
-class Customer(db.Model):
+class Customer(Base):
     __tablename__ = 'customers'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
@@ -60,7 +59,7 @@ class Customer(db.Model):
         
 # Mechanics class
 # This class represents the mechanics table in the database
-class Mechanic(db.Model):
+class Mechanic(Base):
     __tablename__ = 'mechanics'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
@@ -95,7 +94,7 @@ class Mechanic(db.Model):
 
 # Service_Tickets class
 # This class represents the service_tickets table in the database
-class ServiceTicket(db.Model):
+class ServiceTicket(Base):
     __tablename__ = 'service_tickets'
     id = Column(Integer, primary_key=True)
     customer_id = Column(Integer, ForeignKey('customers.id'), nullable=False)
@@ -125,7 +124,7 @@ class ServiceTicket(db.Model):
     
 # Service_Mechanics class
 # This class represents the service_mechanics table in the database as a many-to-many relationship
-class ServiceMechanic(db.Model):
+class ServiceMechanic(Base):
     __tablename__ = 'service_mechanics'
     service_ticket_id = Column(Integer, ForeignKey('service_tickets.id'), primary_key=True)
     mechanic_id = Column(Integer, ForeignKey('mechanics.id'), primary_key=True)
@@ -133,7 +132,7 @@ class ServiceMechanic(db.Model):
 
 # Product class
 # This class represents the inventory table in the database
-class Product(db.Model):
+class Product(Base):
     __tablename__ = 'inventory'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
@@ -149,7 +148,7 @@ class Product(db.Model):
     
 # ProductServiceTicket class junction table between Product and ServiceTicket
 # This class represents the Product_service_tickets table in the database as a many-to-many relationship
-class ProductServiceTicket(db.Model):
+class ProductServiceTicket(Base):
     __tablename__ = 'inventory_service_tickets'
     id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey('inventory.id'), nullable=False)
