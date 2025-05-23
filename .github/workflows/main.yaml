@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -43,6 +45,8 @@ jobs:
 
       - name: Commit and push updated requirements.txt
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
           git add requirements.txt
           git diff --quiet --exit-code || git commit -m "Update requirements.txt with new versions."
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
