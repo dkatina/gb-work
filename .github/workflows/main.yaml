@@ -42,6 +42,11 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
+      - name: Set DB_USER and DB_PASSWORD from secrets
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+
       - name: Check if requirements.txt is updated
         run: |
           git diff --exit-code requirements.txt || echo "requirements.txt has been updated"
@@ -68,6 +73,8 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      FLASK_ENV: testing # Setting the Flask environment to testing
 
     steps:
       - name: Checkout code
