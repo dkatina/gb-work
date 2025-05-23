@@ -3,7 +3,7 @@ from flask import jsonify, request
 from app import create_app
 from app.models import db, Mechanic, Admin
 import unittest
-from app.config import TestingConfig
+from app.config import config_by_name
 
 # python -m unittest discover tests -v
 # python -m unittest tests.test_mechanics -v
