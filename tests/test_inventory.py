@@ -25,8 +25,14 @@ class TestServiceTicket(unittest.TestCase):
         
         # Setting database session from inventorySchemas
         from app.blueprints.inventory.inventorySchemas import ProductSchema
-        ProductSchema.Meta.sqla_session = db.session
-
+        if hasattr(ProductSchema, 'Meta'):
+            setattr(ProductSchema.Meta, 'sqla_session', db.session)
+        else:
+            # If ProductSchema.Meta doesn't exist, create it
+            class Meta:
+                sqla_session = db.session
+            ProductSchema.Meta = Meta
+            
         # Creating a test admin for all tests
         # This admin will be used for authentication in the tests
         admin = Admin(
