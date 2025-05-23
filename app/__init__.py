@@ -10,6 +10,7 @@ from flask_migrate import Migrate
 from app.blueprints.authentication import authentications_bp
 from app.blueprints.inventory import inventory_bp
 from flask_swagger_ui import get_swaggerui_blueprint
+from app.config import config_by_name
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -27,13 +28,13 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
 
 migrate = Migrate()
 
-def create_app(config_class):
+def create_app(config_name):
     
     app = Flask(__name__)
     
     # Config setup
-    app.config.from_object(config_class)
-    
+    app.config.from_object(config_by_name[config_name])
+
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)

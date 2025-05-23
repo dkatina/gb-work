@@ -1,5 +1,5 @@
-from app import create_app
-from app.models import db, Customer, Mechanic
+from app import create_app, db
+from app.models import Customer, Mechanic
 import unittest
 from app.config import TestingConfig
 
@@ -9,22 +9,18 @@ from app.config import TestingConfig
 class TestAuthentication(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.app = create_app(TestingConfig)
-        cls.app.config['PROPAGATE_EXCEPTIONS'] = True
-        cls.app_context = cls.app.app_context()
-        cls.app_context.push()
-        cls.app.config['TESTING'] = True
-        cls.app.config['DEBUG'] = True
-        
+        cls.app = create_app('testing')
         cls.client = cls.app.test_client()
 
-        db.create_all()
+        # Create an application context
+        with cls.app.app_context():
+            db.create_all()
     
     @classmethod
     def tearDownClass(cls):
-        db.session.remove()
-        db.drop_all()
-        cls.app_context.pop()
+        with cls.app.app_context():
+            db.session.remove()
+            db.drop_all()
     
     def setUp(self):
         self.connection = db.engine.connect()

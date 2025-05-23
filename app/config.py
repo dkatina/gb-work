@@ -13,8 +13,8 @@ class CommonConfig:
 
 class BaseConfig(CommonConfig):
     # Fetching DB_USER and DB_PASSWORD for all environments
-    DB_USER = os.getenv('DB_USER')
-    DB_PASSWORD = os.getenv('DB_PASSWORD')
+    DB_USER = os.getenv('DB_USER', 'root')  # Default to 'root' for testing, can be overridden
+    DB_PASSWORD = os.getenv('DB_PASSWORD', '')  # Default to empty string for testing, can be overridden
     # If DB_USER and DB_PASSWORD is not set and it is not testing environment, raise an error
     if not DB_USER or not DB_PASSWORD:
         raise ValueError("ERROR: DB_USER or DB_PASSWORD not set in environment.")
