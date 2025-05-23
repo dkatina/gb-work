@@ -12,10 +12,9 @@ class CommonConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # Disable track modifications to save memory
 
 class BaseConfig(CommonConfig):
-    # Only fetching DB_USER and DB_PASSWORD from .env file for non testing environments
-    DB_USER = os.getenv('DB_USER') if not os.getenv('FLASK_ENV') == 'testing' else 'root'
-    DB_PASSWORD = os.getenv('DB_PASSWORD') if not os.getenv('FLASK_ENV') == 'testing' else ''
-
+    # Fetching DB_USER and DB_PASSWORD for all environments
+    DB_USER = os.getenv('DB_USER')
+    DB_PASSWORD = os.getenv('DB_PASSWORD')
     # If DB_USER and DB_PASSWORD is not set and it is not testing environment, raise an error
     if not DB_USER or not DB_PASSWORD:
         raise ValueError("ERROR: DB_USER or DB_PASSWORD not set in environment.")
