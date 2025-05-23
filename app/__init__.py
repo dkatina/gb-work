@@ -4,11 +4,15 @@ from app.extensions import ma, limiter, cache
 from app.blueprints.customers import customers_bp
 from app.blueprints.service_tickets import service_tickets_bp
 from app.blueprints.mechanics import mechanics_bp
-from app.config import config_by_name
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from app.blueprints.authentication import authentications_bp
 from app.blueprints.inventory import inventory_bp
 from flask_swagger_ui import get_swaggerui_blueprint
+
+db = SQLAlchemy()
+ma = Marshmallow()
 
 SWAGGER_URL = '/api/docs' # URL for exposing Swagger UI (without trailing '/')
 API_URL = '/static/swagger.yaml' # Our API url (can of course be a local resource)
