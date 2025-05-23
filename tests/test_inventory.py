@@ -14,6 +14,7 @@ class TestServiceTicket(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.app = create_app('testing')
+        print(cls.app.config) # Debugging line
         cls.client = cls.app.test_client()
 
         # Create an application context

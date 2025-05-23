@@ -12,8 +12,8 @@ from app.blueprints.inventory import inventory_bp
 from flask_swagger_ui import get_swaggerui_blueprint
 from app.config import config_by_name
 
-db = SQLAlchemy()
-ma = Marshmallow()
+# db = SQLAlchemy()
+# ma = Marshmallow()
 
 SWAGGER_URL = '/api/docs' # URL for exposing Swagger UI (without trailing '/')
 API_URL = '/static/swagger.yaml' # Our API url (can of course be a local resource)
