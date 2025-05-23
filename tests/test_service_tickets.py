@@ -6,6 +6,7 @@ import unittest
 from app.config import config_by_name
 from app.utils.util import not_found
 
+
 # python -m unittest discover tests -v
 # python -m unittest tests.test_service_tickets -v
 
@@ -18,9 +19,14 @@ class TestServiceTicket(unittest.TestCase):
         cls.client = cls.app.test_client()
 
         # Create an application context
-        with cls.app.app_context():
-            db.create_all()
-    
+        cls.app.app_context = cls.app.app_context()
+        cls.app.app_context().push()
+        db.create_all()
+
+        # Setting database session from ServiceTicketSchema
+        from app.blueprints.service_tickets.service_ticketsSchemas import ServiceTicketSchema
+        ServiceTicketSchema.Meta.sqla_session = db.session
+
         # Creating a test admin for all tests
         # This admin will be used for authentication in the tests
         admin = Admin(
@@ -33,9 +39,9 @@ class TestServiceTicket(unittest.TestCase):
     
     @classmethod
     def tearDownClass(cls):
-        with cls.app.app_context():
-            db.session.remove()
-            db.drop_all()
+        db.session.remove()
+        db.drop_all()
+        cls.app_context.pop()
     
     @staticmethod
     def short_uuid():

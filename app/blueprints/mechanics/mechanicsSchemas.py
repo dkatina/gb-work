@@ -1,4 +1,4 @@
-from app.models import Mechanic
+from app.models import Mechanic, db
 from app.extensions import ma
 from marshmallow import fields, post_load, validate
 
@@ -10,6 +10,7 @@ class MechanicSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
         model = Mechanic
+        sqla_session = db.session
         load_instance = True
         include_fk = True
         

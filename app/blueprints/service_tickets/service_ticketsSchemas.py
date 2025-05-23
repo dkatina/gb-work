@@ -1,4 +1,4 @@
-from app.models import Mechanic, ServiceTicket
+from app.models import Mechanic, ServiceTicket, db
 from app.extensions import ma
 from marshmallow import ValidationError, post_load, fields
 from app.blueprints.inventory.inventorySchemas import ProductServiceTicketSchema
@@ -12,6 +12,7 @@ class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
         model = ServiceTicket
+        sqla_session = db.session
         load_instance = True
         include_fk = True
         
@@ -39,6 +40,7 @@ class UpdateServiceTicketSchema(ma.Schema):
     service_desc = fields.Str(required=False)
     vin = fields.Str(required=False)
     class Meta:
+        sqla_session = db.session
         fields = ('add_mechanic_ids', 'remove_mechanic_ids', 'service_desc', 'vin')
 
 

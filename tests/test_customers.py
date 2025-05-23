@@ -16,9 +16,14 @@ class TestCustomer(unittest.TestCase):
         cls.client = cls.app.test_client()
 
         # Create an application context
-        with cls.app.app_context():
-            db.create_all()
-    
+        cls.app.app_context = cls.app.app_context()
+        cls.app.app_context().push()
+        db.create_all()
+
+        # Setting database session for the CustomerSchema
+        from app.blueprints.customers.customersSchemas import CustomerSchema
+        CustomerSchema.Meta.sqla_session = db.session
+        
         # Creating a test admin for all tests
         # This admin will be used for authentication in the tests
         admin = Admin(
@@ -31,9 +36,9 @@ class TestCustomer(unittest.TestCase):
     
     @classmethod
     def tearDownClass(cls):
-        with cls.app.app_context():
-            db.session.remove()
-            db.drop_all()
+        db.session.remove()
+        db.drop_all()
+        cls.app_context.pop()
     
     @staticmethod
     def short_uuid():

@@ -14,14 +14,19 @@ class TestAuthentication(unittest.TestCase):
         cls.client = cls.app.test_client()
 
         # Create an application context
-        with cls.app.app_context():
-            db.create_all()
+        cls.app.app_context = cls.app.app_context()
+        cls.app.app_context().push()
+        db.create_all()
+        
+        # Setting database session from LoginSchema
+        from app.blueprints.authentication.authSchemas import LoginSchema
+        LoginSchema.Meta.sqla_session = db.session
     
     @classmethod
     def tearDownClass(cls):
-        with cls.app.app_context():
-            db.session.remove()
-            db.drop_all()
+        db.session.remove()
+        db.drop_all()
+        cls.app_context.pop()
     
     def setUp(self):
         self.connection = db.engine.connect()

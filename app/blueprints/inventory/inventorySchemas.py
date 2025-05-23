@@ -1,4 +1,4 @@
-from app.models import Product, ProductServiceTicket
+from app.models import Product, ProductServiceTicket, db
 from app.extensions import ma
 from marshmallow import fields, validate
 
@@ -14,6 +14,7 @@ class ProductSchema(ma.SQLAlchemyAutoSchema):
     
     class Meta:
         model = Product
+        sqla_session = db.session
         load_instance = True
         include_fk = True
         
@@ -23,6 +24,7 @@ class ProductServiceTicketSchema(ma.SQLAlchemyAutoSchema):
     
     class Meta:
         model = ProductServiceTicket
+        sqla_session = db.session
         load_instance = True
         include_fk = True
 

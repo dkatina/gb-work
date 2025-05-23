@@ -1,4 +1,4 @@
-from app.models import Customer
+from app.models import Customer, db
 from app.extensions import ma
 from marshmallow import fields, post_load, validate
 
@@ -11,6 +11,7 @@ class CustomerSchema(ma.SQLAlchemyAutoSchema):
     
     class Meta:
         model = Customer
+        sqla_session = db.session
         load_instance = True
         include_fk = True
     
