@@ -42,6 +42,9 @@ def create_app(config_name):
     limiter.init_app(app)
     cache.init_app(app)
     
+    # Ensuring that Marshmallow is using the correct session
+    ma.SQLAlchemySchema.OPTIONS_CLASS.session = db.session
+    
     # Register blueprints
     app.register_blueprint(customers_bp, url_prefix='/customers')
     app.register_blueprint(service_tickets_bp, url_prefix='/service_tickets')
