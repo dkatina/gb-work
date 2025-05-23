@@ -1,7 +1,7 @@
 alembic>=1.0,<8.0
 backports-datetime-fromisoformat>=1.0,<8.0
 blinker>=1.0,<8.0
-cachelib>=1.0,<8.0
+cachelib>=0.1,<8.0
 click>=1.0,<8.0
 colorama>=1.0,<8.0
 Deprecated>=1.0,<8.0
