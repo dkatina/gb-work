@@ -43,11 +43,9 @@ jobs:
 
       - name: Commit and push updated requirements.txt
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "github-actions@github.com"
           git add requirements.txt
           git diff --quiet --exit-code || git commit -m "Update requirements.txt with new versions."
-          git push origin main
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
 
       - name: Print debugging information
         run: |
