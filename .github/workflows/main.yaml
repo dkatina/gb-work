@@ -53,7 +53,7 @@ jobs:
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}  # Using the token to authenticate
 
       - name: Upload requirements.txt
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: requirements.txt
           path: requirements.txt
@@ -86,7 +86,7 @@ jobs:
           source venv/bin/activate
 
       - name: Download requirements.txt
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: requirements.txt
 
