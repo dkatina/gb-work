@@ -17,7 +17,7 @@ class TestCustomer(unittest.TestCase):
 
         # Create an application context
         cls.app.app_context = cls.app.app_context()
-        cls.app.app_context().push()
+        cls.app.app_context.push()
         db.create_all()
 
         # Setting database session for the CustomerSchema
@@ -44,7 +44,7 @@ class TestCustomer(unittest.TestCase):
     def tearDownClass(cls):
         db.session.remove()
         db.drop_all()
-        cls.app_context.pop()
+        cls.app.app_context.pop()
     
     @staticmethod
     def short_uuid():

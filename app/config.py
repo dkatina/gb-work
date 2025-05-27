@@ -8,13 +8,13 @@ env_path = Path(__file__).resolve().parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 class CommonConfig:
-    SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')  # -------------- Default key is set for development, when going to production, set a strong secret key in .env file
+    SECRET_KEY = os.getenv('SECRET_KEY') or 'default_secret_key'  # -------------- Default key is set for development, when going to production, set a strong secret key in .env file
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # Disable track modifications to save memory
 
 class BaseConfig(CommonConfig):
     # Fetching DB_USER and DB_PASSWORD for all environments
-    DB_USER = os.getenv('DB_USER', 'root')  # Default to 'root' for testing, can be overridden
-    DB_PASSWORD = os.getenv('DB_PASSWORD', '')  # Default to empty string for testing, can be overridden
+    DB_USER = os.getenv('DB_USER') or 'root' # Default to 'root' for testing, can be overridden
+    DB_PASSWORD = os.getenv('DB_PASSWORD') or 'no pw'  # Default to empty string for testing, can be overridden
     # If DB_USER and DB_PASSWORD is not set and it is not testing environment, raise an error
     if not DB_USER or not DB_PASSWORD:
         raise ValueError("ERROR: DB_USER or DB_PASSWORD not set in environment.")
@@ -27,7 +27,7 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
     TESTING = False
     
-class TestingConfig(CommonConfig):
+class TestingConfig:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # Use in-memory SQLite database for testing
     DEBUG = True
     TESTING = True

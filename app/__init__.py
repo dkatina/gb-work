@@ -11,6 +11,7 @@ from app.blueprints.authentication import authentications_bp
 from app.blueprints.inventory import inventory_bp
 from flask_swagger_ui import get_swaggerui_blueprint
 from app.config import config_by_name
+import os
 
 # db = SQLAlchemy()
 # ma = Marshmallow()

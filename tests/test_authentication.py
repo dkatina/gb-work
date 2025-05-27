@@ -15,7 +15,7 @@ class TestAuthentication(unittest.TestCase):
 
         # Create an application context
         cls.app.app_context = cls.app.app_context()
-        cls.app.app_context().push()
+        cls.app.app_context.push()
         db.create_all()
         
         # Setting database session from LoginSchema
@@ -32,7 +32,7 @@ class TestAuthentication(unittest.TestCase):
     def tearDownClass(cls):
         db.session.remove()
         db.drop_all()
-        cls.app_context.pop()
+        cls.app.app_context.pop()
     
     def setUp(self):
         self.connection = db.engine.connect()
