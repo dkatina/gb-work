@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from app.blueprints.customers import customers_bp
-from app.blueprints.customers.customersSchemas import CustomerSchema, customers_schema
+from app.blueprints.customers.customersSchemas import CustomerSchema, customers_schema, customer_schema
 from app.models import ServiceTicket, db, Customer, Admin
 from flask import jsonify, request
 from marshmallow import ValidationError
@@ -17,8 +17,7 @@ from werkzeug.exceptions import NotFound
 def create_customer():
     try:
         data = request.get_json()
-        customer_schema = CustomerSchema()
-        customer = customer_schema.load(data, session=db.session)
+        customer = customer_schema.load(data)
         db.session.add(customer)
         db.session.commit()
         return customer_schema.jsonify(customer), 201
