@@ -24,10 +24,15 @@ class TestServiceTicket(unittest.TestCase):
         db.create_all()
 
         # Setting database session from ServiceTicketSchema
-        from app.blueprints.service_tickets.service_ticketsSchemas import ServiceTicketSchema
-        if hasattr(ServiceTicketSchema, 'Meta'):
-            setattr(ServiceTicketSchema.Meta, 'sqla_session', db.session)
-        
+        # from app.blueprints.service_tickets.service_ticketsSchemas import ServiceTicketSchema
+        # if hasattr(ServiceTicketSchema, 'Meta'):
+        #     setattr(ServiceTicketSchema.Meta, 'sqla_session', db.session)
+        # else:
+        #     # If ServiceTicketSchema.Meta doesn't exist, create it
+        #     class Meta:
+        #         sqla_session = db.session
+        #     ServiceTicketSchema.Meta = Meta
+
         # Creating a test admin for all tests
         # This admin will be used for authentication in the tests
         admin = Admin(

@@ -14,7 +14,6 @@ class ProductSchema(ma.SQLAlchemyAutoSchema):
     
     class Meta:
         model = Product
-        sqla_session = db.session
         load_instance = True
         include_fk = True
         

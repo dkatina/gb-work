@@ -24,10 +24,14 @@ class TestMechanic(unittest.TestCase):
         db.create_all()
 
         # Setting database session from MechanicSchema
-        from app.blueprints.mechanics.mechanicsSchemas import MechanicSchema
-        if hasattr(MechanicSchema, 'Meta'):
-            setattr(MechanicSchema.Meta, 'sqla_session', db.session)
-       
+        # from app.blueprints.mechanics.mechanicsSchemas import MechanicSchema
+        # if hasattr(MechanicSchema, 'Meta'):
+        #     setattr(MechanicSchema.Meta, 'sqla_session', db.session)
+        # else:
+        #     # If MechanicSchema.Meta doesn't exist, create it
+        #     class Meta:
+        #         sqla_session = db.session
+        #     MechanicSchema.Meta = Meta
 
         # Creating a test admin for all tests
         # This admin will be used for authentication in the tests

@@ -19,10 +19,14 @@ class TestAuthentication(unittest.TestCase):
         db.create_all()
         
         # Setting database session from LoginSchema
-        from app.blueprints.authentication.authSchemas import LoginSchema
-        if hasattr(LoginSchema, 'Meta'):
-            setattr(LoginSchema.Meta, 'sqla_session', db.session)
-        
+        # from app.blueprints.authentication.authSchemas import LoginSchema
+        # if hasattr(LoginSchema, 'Meta'):
+        #     setattr(LoginSchema.Meta, 'sqla_session', db.session)
+        # else:
+        #     # If LoginSchema.Meta doesn't exist, create it
+        #     class Meta:
+        #         sqla_session = db.session
+        #     LoginSchema.Meta = Meta
 
     @classmethod
     def tearDownClass(cls):

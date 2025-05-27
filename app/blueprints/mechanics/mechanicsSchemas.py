@@ -10,7 +10,6 @@ class MechanicSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
         model = Mechanic
-        sqla_session = db.session
         load_instance = True
         include_fk = True
         
