@@ -24,11 +24,7 @@ class TestCustomer(unittest.TestCase):
         from app.blueprints.customers.customersSchemas import CustomerSchema
         if hasattr(CustomerSchema, 'Meta'):
             setattr(CustomerSchema.Meta, 'sqla_session', db.session)
-        else:
-            # If CustomerSchema.Meta doesn't exist, create it
-            class Meta:
-                sqla_session = db.session
-            CustomerSchema.Meta = Meta
+        
 
         # Creating a test admin for all tests
         # This admin will be used for authentication in the tests
